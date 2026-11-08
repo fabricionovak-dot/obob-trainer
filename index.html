@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#58cc02">
+  <title>OBOB Battle Trainer</title>
+  <style>
+    /* ---------- Theme tokens ---------- */
+    :root {
+      --bg: #f4f6fb;
+      --surface: #ffffff;
+      --surface-2: #f0f2f8;
+      --text: #1f2333;
+      --muted: #687089;
+      --border: #e1e4ee;
+      --shadow: 0 2px 0 rgba(31, 35, 51, .06), 0 10px 30px rgba(31, 35, 51, .06);
+
+      --primary: #58cc02;
+      --primary-shade: #46a302;
+      --danger: #ff4b4b;
+      --danger-shade: #d93636;
+      --neutral-shade: #d3d7e3;
+
+      --iwb: #7c4dff;
+      --iwb-bg: #efe8ff;
+      --content: #0a95d8;
+      --content-bg: #def3fd;
+      --sample: #a05a00;
+      --sample-bg: #fff1d6;
+      --warn: #ff9600;
+
+      --radius: 20px;
+      --font: ui-rounded, "SF Pro Rounded", "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+      color-scheme: light;
+    }
+    [data-theme="dark"] {
+      --bg: #10131c;
+      --surface: #1a1f2c;
+      --surface-2: #232a3a;
+      --text: #eef1f8;
+      --muted: #9aa3ba;
+      --border: #2e364a;
+      --shadow: 0 2px 0 rgba(0, 0, 0, .3), 0 10px 30px rgba(0, 0, 0, .25);
+      --primary-shade: #3d8f02;
+      --neutral-shade: #0b0e15;
+      --iwb: #b49bff;
+      --iwb-bg: #2c2350;
+      --content: #5cc8ff;
+      --content-bg: #12344a;
+      --sample: #ffc86b;
+      --sample-bg: #3d2c0e;
+      color-scheme: dark;
+    }
+
+    /* ---------- Base ---------- */
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      min-height: 100vh;
+      -webkit-tap-highlight-color: transparent;
+      transition: background-color .25s, color .25s;
+    }
+    button, select, input, textarea { font: inherit; color: inherit; }
+    :focus-visible { outline: 3px solid var(--content); outline-offset: 3px; border-radius: 12px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    [hidden] { display: none !important; }
+
+    .app {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: max(16px, env(safe-area-inset-top)) 20px max(32px, env(safe-area-inset-bottom));
+    }
+
+    /* ---------- Header ---------- */
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 1.25rem; letter-spacing: -.01em; }
+    .brand-mark {
+      width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center;
+      background: var(--primary); color: #fff; font-size: 1.3rem; box-shadow: 0 3px 0 var(--primary-shade);
+    }
+    .icon-btn {
+      width: 48px; height: 48px; border-radius: 14px; border: 2px solid var(--border);
+      background: var(--surface); display: grid; place-items: center; cursor: pointer;
+      box-shadow: 0 3px 0 var(--border); transition: transform .08s, box-shadow .08s;
+    }
+    .icon-btn:active { transform: translateY(3px); box-shadow: 0 0 0 var(--border); }
+    .icon-btn svg { width: 22px; height: 22px; }
+
+    /* ---------- Buttons ---------- */
+    .btn {
+      --c: var(--surface); --s: var(--neutral-shade); --t: var(--text);
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      min-height: 56px; padding: 14px 24px; border: 0; border-radius: 16px;
+      background: var(--c); color: var(--t); font-weight: 800; font-size: 1.08rem;
+      box-shadow: 0 4px 0 var(--s); cursor: pointer; user-select: none;
+      transition: transform .08s, box-shadow .08s, filter .15s;
+    }
+    .btn:hover { filter: brightness(1.04); }
+    .btn:active { transform: translateY(4px); box-shadow: 0 0 0 var(--s); }
+    .btn-outline { border: 2px solid var(--border); --s: var(--border); }
+    .btn-primary { --c: var(--primary); --s: var(--primary-shade); --t: #fff; }
+    .btn-danger { --c: var(--danger); --s: var(--danger-shade); --t: #fff; }
+    .btn-block { width: 100%; }
+
+    /* ---------- Cards / panels ---------- */
+    .panel {
+      background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius);
+      padding: 22px; box-shadow: var(--shadow);
+    }
+    .panel + .panel { margin-top: 18px; }
+    .label { display: block; font-weight: 800; font-size: .95rem; margin-bottom: 8px; }
+    .hint { color: var(--muted); font-size: .92rem; margin: 6px 0 0; }
+
+    /* ---------- Home ---------- */
+    .hero { text-align: center; margin: 4px 0 22px; }
+    .hero h1 { font-size: clamp(1.8rem, 5vw, 2.5rem); margin: 0 0 6px; letter-spacing: -.02em; }
+    .hero p { margin: 0; color: var(--muted); font-weight: 700; }
+
+    .select-wrap { position: relative; }
+    .select-wrap::after {
+      content: ""; position: absolute; right: 18px; top: 50%; width: 10px; height: 10px; pointer-events: none;
+      border-right: 3px solid var(--muted); border-bottom: 3px solid var(--muted); transform: translateY(-70%) rotate(45deg);
+    }
+    select, input[type="text"], textarea {
+      width: 100%; min-height: 54px; padding: 12px 16px; border-radius: 14px;
+      border: 2px solid var(--border); background: var(--surface-2); font-weight: 700; font-size: 1.02rem;
+    }
+    select { appearance: none; -webkit-appearance: none; padding-right: 44px; cursor: pointer; }
+    textarea { min-height: 84px; resize: vertical; font-weight: 600; }
+
+    .settings-row { display: grid; gap: 18px; margin-top: 18px; }
+    @media (min-width: 640px) { .settings-row { grid-template-columns: 1.4fr 1fr; align-items: end; } }
+
+    .segmented { display: flex; gap: 6px; padding: 5px; background: var(--surface-2); border: 2px solid var(--border); border-radius: 16px; }
+    .segmented button {
+      flex: 1; min-height: 46px; border: 0; border-radius: 11px; background: transparent;
+      font-weight: 800; font-size: .95rem; color: var(--muted); cursor: pointer; transition: background .15s, color .15s;
+    }
+    .segmented button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 2px 0 var(--border); }
+
+    .switch { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 54px; cursor: pointer; font-weight: 800; }
+    .switch input { position: absolute; opacity: 0; pointer-events: none; }
+    .switch .track {
+      position: relative; flex: none; width: 58px; height: 34px; border-radius: 999px;
+      background: var(--neutral-shade); transition: background .2s;
+    }
+    .switch .track::after {
+      content: ""; position: absolute; top: 4px; left: 4px; width: 26px; height: 26px; border-radius: 50%;
+      background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,.2); transition: transform .2s;
+    }
+    .switch input:checked + .track { background: var(--primary); }
+    .switch input:checked + .track::after { transform: translateX(24px); }
+    .switch input:focus-visible + .track { outline: 3px solid var(--content); outline-offset: 3px; }
+
+    .start-row { margin-top: 22px; }
+
+    .shelf-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 30px 4px 12px; }
+    .shelf-head h2 { margin: 0; font-size: 1.2rem; }
+    .shelf-head span { color: var(--muted); font-weight: 700; font-size: .9rem; }
+    .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .book-tile {
+      position: relative; text-align: left; padding: 14px 14px 14px 22px; min-height: 108px;
+      border-radius: 16px; border: 2px solid var(--border); background: var(--surface);
+      box-shadow: 0 3px 0 var(--border); cursor: pointer; overflow: hidden;
+      display: flex; flex-direction: column; gap: 4px; transition: transform .08s, box-shadow .08s, border-color .15s;
+    }
+    .book-tile::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 8px; background: var(--spine); }
+    .book-tile:active { transform: translateY(3px); box-shadow: 0 0 0 var(--border); }
+    .book-tile[aria-pressed="true"] { border-color: var(--primary); box-shadow: 0 3px 0 var(--primary-shade); }
+    .book-tile strong { font-size: .98rem; line-height: 1.25; }
+    .book-tile small { color: var(--muted); font-weight: 700; font-size: .8rem; }
+    .book-tile .count { margin-top: auto; font-size: .78rem; font-weight: 800; color: var(--muted); }
+
+    details.add-q { margin-top: 26px; }
+    details.add-q summary {
+      cursor: pointer; font-weight: 800; font-size: 1.05rem; list-style: none;
+      display: flex; align-items: center; justify-content: space-between; min-height: 44px;
+    }
+    details.add-q summary::-webkit-details-marker { display: none; }
+    details.add-q summary::after {
+      content: ""; width: 10px; height: 10px; border-right: 3px solid var(--muted); border-bottom: 3px solid var(--muted);
+      transform: rotate(45deg); transition: transform .2s; margin-right: 6px;
+    }
+    details.add-q[open] summary::after { transform: rotate(-135deg); }
+    .form-grid { display: grid; gap: 14px; margin-top: 16px; }
+    .form-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .form-msg { font-weight: 700; color: var(--primary-shade); }
+    [data-theme="dark"] .form-msg { color: var(--primary); }
+
+    /* ---------- Battle ---------- */
+    .battle-top { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+    .progress { flex: 1; height: 18px; background: var(--surface-2); border: 2px solid var(--border); border-radius: 999px; overflow: hidden; }
+    .progress-fill {
+      height: 100%; width: 0; border-radius: 999px; background: var(--primary);
+      background-image: linear-gradient(to bottom, rgba(255,255,255,.35) 0 35%, transparent 35%);
+      transition: width .45s cubic-bezier(.3, 1.4, .5, 1);
+    }
+    .progress-text { font-weight: 900; font-size: 1rem; white-space: nowrap; min-width: 4.5em; text-align: right; }
+
+    .battle-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+    .score-pill { font-weight: 800; color: var(--muted); }
+    .timer-toggle {
+      display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 14px 6px 10px;
+      border-radius: 999px; border: 2px solid var(--border); background: var(--surface); font-weight: 800; cursor: pointer;
+    }
+    .timer-toggle svg { width: 20px; height: 20px; }
+    .timer-toggle[aria-pressed="true"] { border-color: var(--warn); color: var(--warn); }
+
+    .card-stage { position: relative; }
+    .card {
+      background: var(--surface); border: 2px solid var(--border); border-radius: 26px;
+      box-shadow: 0 5px 0 var(--border), var(--shadow); padding: clamp(22px, 4vw, 36px);
+      min-height: 360px; display: flex; flex-direction: column;
+    }
+    .card.leaving { animation: slide-out .22s ease-in forwards; }
+    .card.entering { animation: slide-in .38s cubic-bezier(.2, .9, .3, 1.2); }
+    @keyframes slide-out { to { opacity: 0; transform: translateX(-40px) rotate(-1.5deg); } }
+    @keyframes slide-in { from { opacity: 0; transform: translateX(48px) rotate(1.5deg); } to { opacity: 1; transform: none; } }
+
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px;
+      font-weight: 900; font-size: .85rem; letter-spacing: .01em;
+    }
+    .badge svg { width: 16px; height: 16px; }
+    .badge-iwb { background: var(--iwb-bg); color: var(--iwb); }
+    .badge-content { background: var(--content-bg); color: var(--content); }
+    .badge-sample { background: var(--sample-bg); color: var(--sample); }
+    .badge-mine { background: var(--surface-2); color: var(--muted); }
+
+    .timer-bar { height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden; margin-bottom: 18px; }
+    .timer-fill { height: 100%; width: 100%; background: var(--warn); border-radius: 999px; transform-origin: left; }
+    .timer-row { display: flex; align-items: center; justify-content: space-between; font-weight: 900; color: var(--warn); margin-bottom: 6px; }
+    .timer-row.urgent { color: var(--danger); }
+    .timer-row.urgent + .timer-bar .timer-fill { background: var(--danger); }
+    .timer-row.urgent .secs { animation: pulse .5s ease-in-out infinite alternate; }
+    @keyframes pulse { to { transform: scale(1.18); } }
+    .secs { display: inline-block; font-variant-numeric: tabular-nums; }
+
+    .question { font-size: clamp(1.35rem, 3.6vw, 1.85rem); font-weight: 800; line-height: 1.3; margin: 0 0 24px; letter-spacing: -.01em; }
+    .question:focus { outline: none; }
+
+    .answer {
+      margin-top: auto; border-radius: 18px; padding: 18px 20px; background: var(--surface-2);
+      border: 2px dashed var(--border); animation: pop-in .3s cubic-bezier(.2, .9, .3, 1.3);
+    }
+    @keyframes pop-in { from { opacity: 0; transform: translateY(10px) scale(.98); } }
+    .answer-label { font-size: .85rem; font-weight: 900; color: var(--muted); margin-bottom: 4px; }
+    .answer-text { font-size: clamp(1.2rem, 3vw, 1.5rem); font-weight: 900; }
+    .answer-author { font-weight: 700; color: var(--muted); margin-top: 2px; }
+    .times-up { display: inline-block; margin-bottom: 8px; color: var(--danger); font-weight: 900; }
+
+    .card-actions { margin-top: 22px; display: grid; gap: 12px; }
+    .grade-actions { grid-template-columns: 1fr 1fr; }
+    .kbd-hint { text-align: center; color: var(--muted); font-size: .85rem; font-weight: 700; margin-top: 14px; }
+    @media (pointer: coarse) { .kbd-hint { display: none; } }
+
+    /* ---------- Results ---------- */
+    .results { text-align: center; }
+    .ring { width: 170px; height: 170px; margin: 6px auto 14px; position: relative; }
+    .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .ring circle { fill: none; stroke-width: 14; stroke-linecap: round; }
+    .ring .bg { stroke: var(--surface-2); }
+    .ring .fg { stroke: var(--primary); transition: stroke-dashoffset 1s cubic-bezier(.3, 1, .4, 1); }
+    .ring-label { position: absolute; inset: 0; display: grid; place-content: center; }
+    .ring-label strong { font-size: 2.4rem; line-height: 1; }
+    .ring-label span { color: var(--muted); font-weight: 800; }
+    .results h2 { font-size: 1.8rem; margin: 0 0 4px; }
+    .results p.sub { margin: 0 0 20px; color: var(--muted); font-weight: 700; }
+    .result-actions { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; margin-top: 8px; }
+    .review { text-align: left; margin-top: 18px; }
+    .review h3 { margin: 0 0 12px; font-size: 1.1rem; }
+    .review-item { padding: 14px 0; border-top: 2px solid var(--border); }
+    .review-item:first-of-type { border-top: 0; padding-top: 0; }
+    .review-item .q { font-weight: 700; margin-bottom: 4px; }
+    .review-item .a { font-weight: 900; color: var(--primary-shade); }
+    [data-theme="dark"] .review-item .a { color: var(--primary); }
+
+    .confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 10; }
+    .confetti i {
+      position: absolute; top: -20px; width: 10px; height: 16px; border-radius: 3px;
+      animation: fall linear forwards;
+    }
+    @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+
+    footer { text-align: center; color: var(--muted); font-size: .85rem; font-weight: 600; margin-top: 34px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .confetti { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">📚</span> OBOB Battle Trainer</div>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch to dark theme">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"></svg>
+      </button>
+    </header>
+
+    <!-- ========== Home ========== -->
+    <main id="home">
+      <div class="hero">
+        <h1>Ready to battle?</h1>
+        <p>3rd–5th Grade Division · 2026–2027 list</p>
+      </div>
+
+      <section class="panel" aria-labelledby="setupTitle">
+        <h2 id="setupTitle" class="sr-only">Battle setup</h2>
+        <label class="label" for="bookSelect">Choose a book</label>
+        <div class="select-wrap">
+          <select id="bookSelect"></select>
+        </div>
+        <p class="hint" id="bookHint"></p>
+
+        <div class="settings-row">
+          <div>
+            <span class="label" id="typeLabel">Question type</span>
+            <div class="segmented" role="group" aria-labelledby="typeLabel" id="typeGroup">
+              <button type="button" data-type="mixed" aria-pressed="true">Mixed</button>
+              <button type="button" data-type="iwb" aria-pressed="false">In Which Book</button>
+              <button type="button" data-type="content" aria-pressed="false">Content</button>
+            </div>
+          </div>
+          <label class="switch">
+            <span>15-second timer</span>
+            <input type="checkbox" id="timerSwitch">
+            <span class="track" aria-hidden="true"></span>
+          </label>
+        </div>
+
+        <div class="start-row">
+          <button class="btn btn-primary btn-block" id="startBtn" type="button">Start battle</button>
+        </div>
+      </section>
+
+      <div class="shelf-head">
+        <h2>The book list</h2>
+        <span>Tap a book to practice just that one</span>
+      </div>
+      <div class="shelf" id="shelf"></div>
+
+      <details class="add-q panel">
+        <summary>Add your own questions</summary>
+        <p class="hint">Saved on this device only. Great for adding questions your team writes at practice.</p>
+        <form class="form-grid" id="addForm">
+          <div>
+            <label class="label" for="addBook">Book</label>
+            <div class="select-wrap"><select id="addBook" required></select></div>
+          </div>
+          <div>
+            <span class="label" id="addTypeLabel">Type</span>
+            <div class="segmented" role="group" aria-labelledby="addTypeLabel" id="addTypeGroup">
+              <button type="button" data-type="iwb" aria-pressed="true">In Which Book</button>
+              <button type="button" data-type="content" aria-pressed="false">Content</button>
+            </div>
+          </div>
+          <div>
+            <label class="label" for="addQ">Question</label>
+            <textarea id="addQ" required placeholder="In which book does…"></textarea>
+          </div>
+          <div id="addAnswerWrap" hidden>
+            <label class="label" for="addA">Answer</label>
+            <input type="text" id="addA" placeholder="The answer">
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Save question</button>
+            <button class="btn btn-outline" type="button" id="clearMine">Delete my questions</button>
+            <span class="form-msg" id="formMsg" role="status"></span>
+          </div>
+        </form>
+      </details>
+
+      <footer>Study tool made for fun. Not affiliated with Oregon Battle of the Books.</footer>
+    </main>
+
+    <!-- ========== Battle ========== -->
+    <main id="battle" hidden>
+      <div class="battle-top">
+        <button class="icon-btn" id="quitBtn" type="button" aria-label="Quit battle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <div class="progress" role="progressbar" aria-label="Battle progress" aria-valuemin="0" id="progress">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText" aria-hidden="true"></div>
+      </div>
+
+      <div class="battle-meta">
+        <span class="score-pill" id="scorePill"></span>
+        <button type="button" class="timer-toggle" id="timerToggle" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2h5"/></svg>
+          <span>Timer <span id="timerState">off</span></span>
+        </button>
+      </div>
+
+      <div class="card-stage">
+        <article class="card" id="card" aria-live="off">
+          <div class="badges" id="badges"></div>
+          <div id="timerBox" hidden>
+            <div class="timer-row" id="timerRow"><span>Time</span><span class="secs" id="timerSecs">15</span></div>
+            <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+          </div>
+          <h2 class="question" id="questionText" tabindex="-1"></h2>
+          <div class="answer" id="answerBox" hidden>
+            <span class="times-up" id="timesUp" hidden>Time's up!</span>
+            <div class="answer-label">Answer</div>
+            <div class="answer-text" id="answerText"></div>
+            <div class="answer-author" id="answerAuthor"></div>
+          </div>
+          <div class="card-actions" id="revealActions">
+            <button class="btn btn-primary btn-block" id="revealBtn" type="button">Show answer</button>
+          </div>
+          <div class="card-actions grade-actions" id="gradeActions" hidden>
+            <button class="btn btn-danger" id="missBtn" type="button">Missed it</button>
+            <button class="btn btn-primary" id="gotBtn" type="button">Got it!</button>
+          </div>
+        </article>
+      </div>
+      <p class="kbd-hint">Keyboard: Space shows the answer · ← missed · → got it</p>
+    </main>
+
+    <!-- ========== Results ========== -->
+    <main id="results" hidden>
+      <section class="panel results">
+        <div class="ring">
+          <svg viewBox="0 0 160 160" aria-hidden="true">
+            <circle class="bg" cx="80" cy="80" r="66"/>
+            <circle class="fg" id="ringFg" cx="80" cy="80" r="66"/>
+          </svg>
+          <div class="ring-label"><strong id="ringPct">0%</strong><span id="ringScore"></span></div>
+        </div>
+        <h2 id="resultTitle" tabindex="-1"></h2>
+        <p class="sub" id="resultSub"></p>
+        <div class="result-actions">
+          <button class="btn btn-outline" id="homeBtn" type="button">Home</button>
+          <button class="btn btn-primary" id="againBtn" type="button">Battle again</button>
+        </div>
+      </section>
+      <section class="panel review" id="review" hidden>
+        <h3>Questions to review</h3>
+        <div id="reviewList"></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="sr-only" aria-live="assertive" id="announcer"></div>
+
+  <script>
+    /* =========================================================
+       Book roster: 2026–2027 OBOB 3rd–5th Grade Division
+       ========================================================= */
+    const BOOKS = [
+      { id: "dogtown",      title: "Dogtown", author: "Katherine Applegate & Gennifer Choldenko" },
+      { id: "frindle",      title: "Frindle", author: "Andrew Clements" },
+      { id: "lightning",    title: "The Lightning Thief", author: "Rick Riordan" },
+      { id: "esperanza",    title: "Esperanza Rising", author: "Pam Muñoz Ryan" },
+      { id: "caterpillar",  title: "Caterpillar Summer", author: "Gillian McDunn" },
+      { id: "stars",        title: "Connect the Stars", author: "Marisa de los Santos & David Teague" },
+      { id: "grace",        title: "The Grace of Wild Things", author: "Heather Fawcett" },
+      { id: "guardian",     title: "The Guardian Test", author: "Christina Soontornvat" },
+      { id: "endworld",     title: "It's the End of the World and I'm in My Bathing Suit", author: "Justin A. Reynolds" },
+      { id: "spark",        title: "A Kind of Spark", author: "Elle McNicoll" },
+      { id: "lightair",     title: "Light and Air", author: "Mindy Nichols Wendell" },
+      { id: "misfits",      title: "The Magic Misfits", author: "Neil Patrick Harris" },
+      { id: "fletcher",     title: "The Misadventures of the Family Fletcher", author: "Dana Alison Levy" },
+      { id: "museum",       title: "Murder at the Museum", author: "Alasdair Beckett-King" },
+      { id: "snowrose",     title: "Snow and Rose", author: "Emily Winfield Martin" },
+      { id: "witchboy",     title: "The Witch Boy", author: "Lee Knox Ostertag" }
+    ];
+
+    const SPINES = ["#58cc02", "#1cb0f6", "#ff9600", "#ce82ff", "#ff4b4b", "#2bd9c5", "#ffc800", "#ff86d0"];
+
+    /* =========================================================
+       Question database
+       type "iwb"     = In Which Book (answer is the book + author, filled in automatically)
+       type "content" = Content trivia (needs an answer)
+       Books with fewer than 4 entries are topped up by generateFallback().
+       ========================================================= */
+    const questionDatabase = {
+      dogtown: [
+        { type: "iwb", q: "In which book is the story told by a three-legged dog who lives at a shelter?" },
+        { type: "iwb", q: "In which book does a real dog become friends with a robot dog?" },
+        { type: "content", q: "In Dogtown, what is the name of the dog who tells the story?", a: "Chance" },
+        { type: "content", q: "In Dogtown, what is the name of the robot dog Chance becomes friends with?", a: "Metal Dog" },
+        { type: "content", q: "In Dogtown, what two kinds of dogs live at the Dogtown shelter?", a: "Real dogs and robot dogs" }
+      ],
+      frindle: [
+        { type: "iwb", q: "In which book does a boy invent a new word for a pen?" },
+        { type: "iwb", q: "In which book does a teacher who loves the dictionary keep students after school for using a made-up word?" },
+        { type: "content", q: "In Frindle, what everyday object does Nick give a new name?", a: "A pen" },
+        { type: "content", q: "In Frindle, what is the name of Nick's fifth-grade language arts teacher?", a: "Mrs. Granger" },
+        { type: "content", q: "In Frindle, what is Nick's last name?", a: "Allen" },
+        { type: "content", q: "In Frindle, which businessman starts selling frindle products?", a: "Bud Lawrence" }
+      ],
+      lightning: [
+        { type: "iwb", q: "In which book does a boy find out the pen he carries turns into a sword?" },
+        { type: "iwb", q: "In which book do three friends get stuck in a Las Vegas hotel where time passes much faster than they think?" },
+        { type: "content", q: "In The Lightning Thief, what is the name of the summer camp for demigods?", a: "Camp Half-Blood" },
+        { type: "content", q: "In The Lightning Thief, which Greek god is Percy's father?", a: "Poseidon" },
+        { type: "content", q: "In The Lightning Thief, what is the name of Percy's satyr friend?", a: "Grover" },
+        { type: "content", q: "In The Lightning Thief, who turns out to have stolen Zeus's master bolt?", a: "Luke" },
+        { type: "content", q: "In The Lightning Thief, what is the name of Percy's sword?", a: "Riptide (Anaklusmos)" }
+      ],
+      esperanza: [
+        { type: "iwb", q: "In which book does a girl's family lose their ranch in Mexico and move to work on farms in California?" },
+        { type: "iwb", q: "In which book does a grandmother teach her granddaughter to crochet a blanket with zigzag mountains?" },
+        { type: "content", q: "In Esperanza Rising, what is the name of the family's ranch in Mexico?", a: "El Rancho de las Rosas" },
+        { type: "content", q: "In Esperanza Rising, what illness does Mama get in California?", a: "Valley Fever" },
+        { type: "content", q: "In Esperanza Rising, what is the name of the boy who works on the ranch and becomes Esperanza's friend?", a: "Miguel" },
+        { type: "content", q: "In Esperanza Rising, what does Esperanza's grandmother teach her to make?", a: "A crocheted blanket" }
+      ],
+      caterpillar: [
+        { type: "iwb", q: "In which book do a girl and her little brother spend the summer with grandparents they have never met?" },
+        { type: "content", q: "In Caterpillar Summer, what is the nickname of Cat's younger brother?", a: "Chicken" },
+        { type: "content", q: "In Caterpillar Summer, what is Cat's full first name?", a: "Caterpillar" },
+        { type: "content", q: "In Caterpillar Summer, on what island do Cat's grandparents live?", a: "Gingerbread Island" }
+      ],
+      stars: [
+        { type: "iwb", q: "In which book can one of the main characters always tell when someone is lying?" },
+        { type: "iwb", q: "In which book does a boy who remembers everything he reads go to a wilderness camp in the desert?" },
+        { type: "content", q: "In Connect the Stars, what special ability does Audrey have?", a: "She can tell when people are lying" },
+        { type: "content", q: "In Connect the Stars, what special ability does Aaron have?", a: "He remembers everything (a perfect memory)" }
+      ],
+      spark: [
+        { type: "iwb", q: "In which book does a girl campaign for a memorial to the women accused of being witches in her village?" },
+        { type: "iwb", q: "In which book does an autistic girl who loves sharks stand up to a teacher who treats her unfairly?" },
+        { type: "content", q: "In A Kind of Spark, what is the name of Addie's village?", a: "Juniper" },
+        { type: "content", q: "In A Kind of Spark, what are the names of Addie's older twin sisters?", a: "Keedie and Nina" },
+        { type: "content", q: "In A Kind of Spark, what animal does Addie love to learn about?", a: "Sharks" },
+        { type: "content", q: "In A Kind of Spark, what is the name of the new girl who becomes Addie's friend?", a: "Audrey" }
+      ],
+      misfits: [
+        { type: "iwb", q: "In which book does a boy run away from his crooked Uncle Sly by hopping on a train?" },
+        { type: "iwb", q: "In which book does a group of young magicians team up to stop a carnival owner named B.B. Bosso?" },
+        { type: "content", q: "In The Magic Misfits, what is the name of the town where Carter ends up?", a: "Mineral Wells" },
+        { type: "content", q: "In The Magic Misfits, who owns the magic shop where Carter finds a home?", a: "Mr. Vernon (Dante Vernon)" },
+        { type: "content", q: "In The Magic Misfits, what kind of magic is Leila best at?", a: "Escapes (she's an escape artist)" },
+        { type: "content", q: "In The Magic Misfits, what are the names of the joke-telling twins?", a: "Olly and Izzy Golden" }
+      ],
+      fletcher: [
+        { type: "iwb", q: "In which book do four brothers and their two dads deal with a grumpy new neighbor?" },
+        { type: "iwb", q: "In which book does a six-year-old have an imaginary cheetah named Flare?" },
+        { type: "content", q: "In The Misadventures of the Family Fletcher, what are the names of the four brothers?", a: "Sam, Jax, Eli, and Frog" },
+        { type: "content", q: "In The Misadventures of the Family Fletcher, what is the name of the grumpy neighbor?", a: "Mr. Nelson" },
+        { type: "content", q: "In The Misadventures of the Family Fletcher, what do the boys call their two dads?", a: "Dad and Papa" }
+      ],
+      snowrose: [
+        { type: "iwb", q: "In which book do two sisters move to a cottage in the woods after their father goes missing?" },
+        { type: "iwb", q: "In which book does a bear come to two sisters' cottage door?" },
+        { type: "content", q: "In Snow and Rose, what animal visits the sisters' cottage?", a: "A bear" },
+        { type: "content", q: "In Snow and Rose, what happened to the sisters' father?", a: "He disappeared in the woods" }
+      ],
+      witchboy: [
+        { type: "iwb", q: "In which book does a boy secretly practice witchcraft even though the boys in his family are supposed to become shapeshifters?" },
+        { type: "iwb", q: "In which book do boys from a magical family start to disappear?" },
+        { type: "content", q: "In The Witch Boy, what is the main character's name?", a: "Aster" },
+        { type: "content", q: "In The Witch Boy, what is the name of Aster's friend who is not from a magical family?", a: "Charlie" },
+        { type: "content", q: "In The Witch Boy, in Aster's family, what magic do the girls learn?", a: "Witchcraft" }
+      ]
+      // grace, guardian, endworld, lightair, museum: no custom entries yet, so fallback cards are used.
+      // Add real questions here (or with the "Add your own questions" form) once someone has read them.
+    };
+
+    /* Fallback: generates accurate sample cards from the book's title and author. */
+    function generateFallback(book) {
+      return [
+        { type: "iwb", q: `Which book on this year's list was written by ${book.author}?`, sample: true },
+        { type: "content", q: `Who wrote ${book.title}?`, a: book.author, sample: true },
+        { type: "content", q: `Who is the main character in ${book.title}, and what do they want most?`, a: "Say it out loud, then check your book or ask a teammate.", sample: true },
+        { type: "content", q: `Where does ${book.title} take place?`, a: "Say it out loud, then check your book or ask a teammate.", sample: true }
+      ];
+    }
+
+    /* =========================================================
+       Storage helpers
+       ========================================================= */
+    const store = {
+      get(key, fallback) {
+        try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch { return fallback; }
+      },
+      set(key, value) {
+        try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* private mode: ignore */ }
+      }
+    };
+    const getMine = () => store.get("obob-my-questions", {});
+
+    function getQuestionsForBook(bookId) {
+      const book = BOOKS.find(b => b.id === bookId);
+      const builtIn = questionDatabase[bookId] || [];
+      const mine = (getMine()[bookId] || []).map(q => ({ ...q, mine: true }));
+      let all = [...builtIn, ...mine];
+      if (all.length < 4) all = all.concat(generateFallback(book).slice(0, 4 - all.length));
+      return all.map(q => ({ ...q, bookId }));
+    }
+
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    /* =========================================================
+       State
+       ========================================================= */
+    const SESSION_SIZE = 16;
+    const TIME_LIMIT = 15;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const state = {
+      book: "all",
+      type: "mixed",
+      timerOn: store.get("obob-timer", false),
+      deck: [],
+      index: 0,
+      correct: 0,
+      missed: [],
+      revealed: false,
+      timerId: null
+    };
+
+    const $ = id => document.getElementById(id);
+    const screens = { home: $("home"), battle: $("battle"), results: $("results") };
+
+    function show(name) {
+      Object.entries(screens).forEach(([k, el]) => { el.hidden = k !== name; });
+      window.scrollTo({ top: 0, behavior: reduceMotion.matches ? "auto" : "smooth" });
+    }
+
+    function announce(text) {
+      const el = $("announcer");
+      el.textContent = "";
+      setTimeout(() => { el.textContent = text; }, 30);
+    }
+
+    /* =========================================================
+       Theme
+       ========================================================= */
+    const ICON_SUN = '<circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+    const ICON_MOON = '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>';
+
+    function applyTheme(theme) {
+      document.documentElement.dataset.theme = theme;
+      const dark = theme === "dark";
+      $("themeIcon").innerHTML = dark ? ICON_SUN : ICON_MOON;
+      $("themeBtn").setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+      document.querySelector('meta[name="theme-color"]').content = dark ? "#10131c" : "#58cc02";
+    }
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
+    applyTheme(store.get("obob-theme", null) || (prefersDark.matches ? "dark" : "light"));
+    prefersDark.addEventListener("change", e => { if (!store.get("obob-theme", null)) applyTheme(e.matches ? "dark" : "light"); });
+    $("themeBtn").addEventListener("click", () => {
+      const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      store.set("obob-theme", next);
+      applyTheme(next);
+    });
+
+    /* =========================================================
+       Home screen
+       ========================================================= */
+    function fillBookOptions(select, includeAll) {
+      select.innerHTML = "";
+      if (includeAll) select.add(new Option("All 16 books (mixed battle)", "all"));
+      BOOKS.forEach(b => select.add(new Option(`${b.title} · ${b.author}`, b.id)));
+    }
+
+    function renderShelf() {
+      const shelf = $("shelf");
+      shelf.innerHTML = "";
+      BOOKS.forEach((b, i) => {
+        const custom = (questionDatabase[b.id] || []).length + (getMine()[b.id] || []).length;
+        const tile = document.createElement("button");
+        tile.type = "button";
+        tile.className = "book-tile";
+        tile.style.setProperty("--spine", SPINES[i % SPINES.length]);
+        tile.setAttribute("aria-pressed", String(state.book === b.id));
+        const strong = document.createElement("strong");
+        strong.textContent = b.title;
+        const small = document.createElement("small");
+        small.textContent = b.author;
+        const count = document.createElement("span");
+        count.className = "count";
+        count.textContent = custom ? `${custom} question${custom === 1 ? "" : "s"}` : "Sample cards only";
+        tile.append(strong, small, count);
+        tile.addEventListener("click", () => setBook(state.book === b.id ? "all" : b.id));
+        shelf.appendChild(tile);
+      });
+    }
+
+    function setBook(id) {
+      state.book = id;
+      $("bookSelect").value = id;
+      if (id === "all") {
+        $("bookHint").textContent = "One question from every book, just like a real battle round.";
+      } else {
+        const n = Math.min(getQuestionsForBook(id).length, SESSION_SIZE);
+        $("bookHint").textContent = `Practice ${n} questions from this book.`;
+      }
+      renderShelf();
+    }
+
+    function wireSegmented(group, onChange) {
+      group.addEventListener("click", e => {
+        const btn = e.target.closest("button[data-type]");
+        if (!btn) return;
+        group.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
+        onChange(btn.dataset.type);
+      });
+    }
+
+    fillBookOptions($("bookSelect"), true);
+    fillBookOptions($("addBook"), false);
+    $("bookSelect").addEventListener("change", e => setBook(e.target.value));
+    wireSegmented($("typeGroup"), t => { state.type = t; });
+    $("timerSwitch").checked = state.timerOn;
+    $("timerSwitch").addEventListener("change", e => setTimerOn(e.target.checked));
+    $("startBtn").addEventListener("click", startBattle);
+    setBook("all");
+
+    /* Add your own questions */
+    let addType = "iwb";
+    wireSegmented($("addTypeGroup"), t => {
+      addType = t;
+      $("addAnswerWrap").hidden = t === "iwb";
+      $("addA").required = t === "content";
+    });
+    $("addForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const bookId = $("addBook").value;
+      const q = $("addQ").value.trim();
+      const a = $("addA").value.trim();
+      if (!q || (addType === "content" && !a)) return;
+      const mine = getMine();
+      (mine[bookId] = mine[bookId] || []).push(addType === "iwb" ? { type: "iwb", q } : { type: "content", q, a });
+      store.set("obob-my-questions", mine);
+      $("addQ").value = "";
+      $("addA").value = "";
+      $("formMsg").textContent = "Saved!";
+      setTimeout(() => { $("formMsg").textContent = ""; }, 2000);
+      setBook(state.book);
+    });
+    $("clearMine").addEventListener("click", () => {
+      const total = Object.values(getMine()).reduce((n, list) => n + list.length, 0);
+      if (!total) { $("formMsg").textContent = "No saved questions yet."; return; }
+      if (!confirm(`Delete all ${total} of your saved questions?`)) return;
+      store.set("obob-my-questions", {});
+      $("formMsg").textContent = "Deleted.";
+      setBook(state.book);
+    });
+
+    /* =========================================================
+       Battle
+       ========================================================= */
+    function matchesType(q) { return state.type === "mixed" || q.type === state.type; }
+
+    function buildDeck() {
+      if (state.book === "all") {
+        return shuffle(BOOKS.map(b => {
+          const pool = getQuestionsForBook(b.id);
+          const filtered = pool.filter(matchesType);
+          const pick = filtered.length ? filtered : pool;
+          return pick[Math.floor(Math.random() * pick.length)];
+        }));
+      }
+      const pool = getQuestionsForBook(state.book);
+      const filtered = pool.filter(matchesType);
+      return shuffle(filtered.length ? filtered : pool).slice(0, SESSION_SIZE);
+    }
+
+    function startBattle() {
+      state.deck = buildDeck();
+      state.index = 0;
+      state.correct = 0;
+      state.missed = [];
+      show("battle");
+      renderCard(false);
+    }
+
+    function renderCard(animate = true) {
+      const card = $("card");
+      const paint = () => {
+        const q = state.deck[state.index];
+        const book = BOOKS.find(b => b.id === q.bookId);
+        const total = state.deck.length;
+        state.revealed = false;
+
+        // Progress
+        $("progressFill").style.width = `${(state.index / total) * 100}%`;
+        $("progressText").textContent = `${state.index + 1} / ${total}`;
+        const bar = $("progress");
+        bar.setAttribute("aria-valuemax", total);
+        bar.setAttribute("aria-valuenow", state.index + 1);
+        bar.setAttribute("aria-valuetext", `Question ${state.index + 1} of ${total}`);
+        $("scorePill").textContent = `Question ${state.index + 1} of ${total} · ${state.correct} correct`;
+
+        // Badges (IWB cards never show the book, that would give the answer away)
+        const badges = $("badges");
+        badges.innerHTML = "";
+        badges.appendChild(makeBadge(q.type === "iwb" ? "In Which Book" : "Content Trivia", q.type === "iwb" ? "badge-iwb" : "badge-content", q.type));
+        if (q.sample) badges.appendChild(makeBadge("Sample card", "badge-sample"));
+        if (q.mine) badges.appendChild(makeBadge("My question", "badge-mine"));
+
+        // Question + answer
+        $("questionText").textContent = q.q;
+        if (q.type === "iwb") {
+          $("answerText").textContent = book.title;
+          $("answerAuthor").textContent = `by ${book.author}`;
+        } else {
+          $("answerText").textContent = q.a;
+          $("answerAuthor").textContent = book.title;
+        }
+        $("answerBox").hidden = true;
+        $("timesUp").hidden = true;
+        $("revealActions").hidden = false;
+        $("gradeActions").hidden = true;
+
+        $("questionText").focus({ preventScroll: true });
+        startTimer();
+      };
+
+      stopTimer();
+      if (!animate || reduceMotion.matches) { paint(); return; }
+      card.classList.remove("entering");
+      card.classList.add("leaving");
+      setTimeout(() => {
+        card.classList.remove("leaving");
+        paint();
+        void card.offsetWidth; // restart animation
+        card.classList.add("entering");
+      }, 220);
+    }
+
+    const BADGE_ICONS = {
+      iwb: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/>',
+      content: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/>'
+    };
+    function makeBadge(text, cls, icon) {
+      const span = document.createElement("span");
+      span.className = `badge ${cls}`;
+      if (icon) span.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${BADGE_ICONS[icon]}</svg>`;
+      span.appendChild(document.createTextNode(text));
+      return span;
+    }
+
+    function reveal(timeUp = false) {
+      if (state.revealed) return;
+      state.revealed = true;
+      stopTimer();
+      $("timesUp").hidden = !timeUp;
+      $("answerBox").hidden = false;
+      $("revealActions").hidden = true;
+      $("gradeActions").hidden = false;
+      announce(`${timeUp ? "Time's up. " : ""}Answer: ${$("answerText").textContent} ${$("answerAuthor").textContent}`);
+      $("gotBtn").focus({ preventScroll: true });
+    }
+
+    function grade(gotIt) {
+      if (!state.revealed) return;
+      const q = state.deck[state.index];
+      if (gotIt) state.correct++;
+      else state.missed.push(q);
+      state.index++;
+      if (state.index >= state.deck.length) finish();
+      else renderCard(true);
+    }
+
+    $("revealBtn").addEventListener("click", () => reveal(false));
+    $("gotBtn").addEventListener("click", () => grade(true));
+    $("missBtn").addEventListener("click", () => grade(false));
+    $("quitBtn").addEventListener("click", () => {
+      if (state.index > 0 && !confirm("Quit this battle? Your progress will be lost.")) return;
+      stopTimer();
+      show("home");
+    });
+
+    document.addEventListener("keydown", e => {
+      if (screens.battle.hidden || e.altKey || e.ctrlKey || e.metaKey) return;
+      if (e.key === " " && !state.revealed && document.activeElement.tagName !== "BUTTON") { e.preventDefault(); reveal(false); }
+      else if (e.key === "ArrowRight" && state.revealed) grade(true);
+      else if (e.key === "ArrowLeft" && state.revealed) grade(false);
+    });
+
+    /* =========================================================
+       Timer (15 s, like a real OBOB battle)
+       ========================================================= */
+    function setTimerOn(on) {
+      state.timerOn = on;
+      store.set("obob-timer", on);
+      $("timerSwitch").checked = on;
+      $("timerToggle").setAttribute("aria-pressed", String(on));
+      $("timerState").textContent = on ? "on" : "off";
+      if (!screens.battle.hidden) {
+        if (on && !state.revealed) startTimer();
+        else stopTimer();
+      }
+    }
+    setTimerOn(state.timerOn);
+    $("timerToggle").addEventListener("click", () => setTimerOn(!state.timerOn));
+
+    function startTimer() {
+      stopTimer();
+      $("timerBox").hidden = !state.timerOn;
+      if (!state.timerOn || state.revealed) return;
+      const end = Date.now() + TIME_LIMIT * 1000;
+      const tick = () => {
+        const left = Math.max(0, (end - Date.now()) / 1000);
+        $("timerSecs").textContent = Math.ceil(left);
+        $("timerFill").style.transform = `scaleX(${left / TIME_LIMIT})`;
+        $("timerRow").classList.toggle("urgent", left <= 5);
+        if (left <= 0) reveal(true);
+      };
+      tick();
+      state.timerId = setInterval(tick, 100);
+    }
+
+    function stopTimer() {
+      clearInterval(state.timerId);
+      state.timerId = null;
+      $("timerRow").classList.remove("urgent");
+      if (!state.timerOn) $("timerBox").hidden = true;
+    }
+
+    /* =========================================================
+       Results
+       ========================================================= */
+    function finish() {
+      stopTimer();
+      $("progressFill").style.width = "100%";
+      const total = state.deck.length;
+      const pct = Math.round((state.correct / total) * 100);
+      const C = 2 * Math.PI * 66;
+      const ring = $("ringFg");
+      ring.style.strokeDasharray = C;
+      ring.style.strokeDashoffset = C;
+
+      show("results");
+      requestAnimationFrame(() => requestAnimationFrame(() => { ring.style.strokeDashoffset = C * (1 - pct / 100); }));
+      $("ringPct").textContent = `${pct}%`;
+      $("ringScore").textContent = `${state.correct} of ${total}`;
+
+      const [title, sub] =
+        pct === 100 ? ["Perfect battle!", "Every single one. Your team is lucky to have you."] :
+        pct >= 80   ? ["Amazing work!", "You really know these books."] :
+        pct >= 50   ? ["Nice job!", "Review the ones you missed and try again."] :
+                      ["Keep reading!", "Every battle makes you stronger. Try again!"];
+      $("resultTitle").textContent = title;
+      $("resultSub").textContent = sub;
+      $("resultTitle").focus({ preventScroll: true });
+
+      const list = $("reviewList");
+      list.innerHTML = "";
+      state.missed.forEach(q => {
+        const book = BOOKS.find(b => b.id === q.bookId);
+        const item = document.createElement("div");
+        item.className = "review-item";
+        const qEl = document.createElement("div");
+        qEl.className = "q";
+        qEl.textContent = q.q;
+        const aEl = document.createElement("div");
+        aEl.className = "a";
+        aEl.textContent = q.type === "iwb" ? `${book.title} by ${book.author}` : q.a;
+        item.append(qEl, aEl);
+        list.appendChild(item);
+      });
+      $("review").hidden = state.missed.length === 0;
+
+      if (pct >= 80) confetti();
+    }
+
+    function confetti() {
+      if (reduceMotion.matches) return;
+      const box = document.createElement("div");
+      box.className = "confetti";
+      for (let i = 0; i < 80; i++) {
+        const p = document.createElement("i");
+        p.style.left = `${Math.random() * 100}%`;
+        p.style.background = SPINES[i % SPINES.length];
+        p.style.animationDuration = `${1.8 + Math.random() * 1.6}s`;
+        p.style.animationDelay = `${Math.random() * .5}s`;
+        box.appendChild(p);
+      }
+      document.body.appendChild(box);
+      setTimeout(() => box.remove(), 4200);
+    }
+
+    $("againBtn").addEventListener("click", startBattle);
+    $("homeBtn").addEventListener("click", () => { show("home"); setBook(state.book); });
+  </script>
+</body>
+</html>
