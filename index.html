@@ -133,9 +133,6 @@
     select { appearance: none; -webkit-appearance: none; padding-right: 44px; cursor: pointer; }
     textarea { min-height: 84px; resize: vertical; font-weight: 600; }
 
-    .settings-row { display: grid; gap: 18px; margin-top: 18px; }
-    @media (min-width: 640px) { .settings-row { grid-template-columns: 1.4fr 1fr; align-items: end; } }
-
     .segmented { display: flex; gap: 6px; padding: 5px; background: var(--surface-2); border: 2px solid var(--border); border-radius: 16px; }
     .segmented button {
       flex: 1; min-height: 46px; border: 0; border-radius: 11px; background: transparent;
@@ -143,25 +140,6 @@
     }
     .segmented button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 2px 0 var(--border); }
 
-    .switch { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 54px; cursor: pointer; font-weight: 800; }
-    .switch input { position: absolute; opacity: 0; pointer-events: none; }
-    .switch .track {
-      position: relative; flex: none; width: 58px; height: 34px; border-radius: 999px;
-      background: var(--neutral-shade); transition: background .2s;
-    }
-    .switch .track::after {
-      content: ""; position: absolute; top: 4px; left: 4px; width: 26px; height: 26px; border-radius: 50%;
-      background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,.2); transition: transform .2s;
-    }
-    .switch input:checked + .track { background: var(--primary); }
-    .switch input:checked + .track::after { transform: translateX(24px); }
-    .switch input:focus-visible + .track { outline: 3px solid var(--content); outline-offset: 3px; }
-
-    .start-row { margin-top: 22px; }
-
-    .shelf-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 30px 4px 12px; }
-    .shelf-head h2 { margin: 0; font-size: 1.2rem; }
-    .shelf-head span { color: var(--muted); font-weight: 700; font-size: .9rem; }
     .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
     .book-tile {
       position: relative; text-align: left; padding: 14px 14px 14px 22px; min-height: 108px;
@@ -177,6 +155,13 @@
     .book-tile .count { margin-top: auto; font-size: .78rem; font-weight: 800; color: var(--muted); }
 
     details.add-q { margin-top: 26px; }
+    details.add-q + details.add-q { margin-top: 18px; }
+    .sources h3 { margin: 18px 0 6px; font-size: 1rem; }
+    .sources p, .sources li { color: var(--muted); font-weight: 600; font-size: .95rem; }
+    .sources p { margin: 0 0 8px; }
+    .sources ul { margin: 0 0 8px; padding-left: 20px; }
+    .sources li { margin-bottom: 4px; }
+    .sources a { color: var(--content); font-weight: 800; }
     details.add-q summary {
       cursor: pointer; font-weight: 800; font-size: 1.05rem; list-style: none;
       display: flex; align-items: center; justify-content: space-between; min-height: 44px;
@@ -243,7 +228,7 @@
     .secs { display: inline-block; font-variant-numeric: tabular-nums; }
 
     .question { font-size: clamp(1.35rem, 3.6vw, 1.85rem); font-weight: 800; line-height: 1.3; margin: 0 0 24px; letter-spacing: -.01em; }
-    .question:focus { outline: none; }
+    .question:focus, [tabindex="-1"]:focus { outline: none; }
 
     .answer {
       margin-top: auto; border-radius: 18px; padding: 18px 20px; background: var(--surface-2);
@@ -290,6 +275,82 @@
 
     footer { text-align: center; color: var(--muted); font-size: .85rem; font-weight: 600; margin-top: 34px; }
 
+    /* ---------- Book picker ---------- */
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+    .panel-head h2 { margin: 0; font-size: 1.2rem; }
+    .link-btns { display: flex; gap: 8px; }
+    .chip-btn {
+      min-height: 40px; padding: 6px 14px; border-radius: 999px; border: 2px solid var(--border);
+      background: var(--surface-2); font-weight: 800; font-size: .9rem; cursor: pointer;
+    }
+    .book-tile strong { padding-right: 28px; }
+    .book-tile .check {
+      position: absolute; top: 10px; right: 10px; width: 26px; height: 26px; border-radius: 50%;
+      border: 2px solid var(--border); background: var(--surface); color: #fff;
+      display: grid; place-items: center; transition: background .15s, border-color .15s;
+    }
+    .book-tile .check svg { width: 14px; height: 14px; opacity: 0; }
+    .book-tile[aria-pressed="true"] .check { background: var(--primary); border-color: var(--primary); }
+    .book-tile[aria-pressed="true"] .check svg { opacity: 1; }
+    .picked-hint { margin: 14px 2px 0; font-weight: 800; color: var(--muted); }
+
+    /* ---------- Run settings ---------- */
+    .settings-grid { display: grid; gap: 18px; }
+    @media (min-width: 640px) { .settings-grid { grid-template-columns: 1fr 1fr; } .settings-grid > :first-child { grid-column: 1 / -1; } }
+    details.scoring { margin-top: 18px; border-top: 2px solid var(--border); padding-top: 8px; }
+    details.scoring summary { cursor: pointer; font-weight: 800; min-height: 44px; display: flex; align-items: center; justify-content: space-between; list-style: none; }
+    details.scoring summary::-webkit-details-marker { display: none; }
+    details.scoring summary::after {
+      content: ""; width: 10px; height: 10px; border-right: 3px solid var(--muted); border-bottom: 3px solid var(--muted);
+      transform: rotate(45deg); transition: transform .2s; margin-right: 6px;
+    }
+    details.scoring[open] summary::after { transform: rotate(-135deg); }
+    .points-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+    .points-grid label { display: grid; gap: 6px; font-weight: 700; font-size: .9rem; color: var(--muted); }
+    input[type="number"] {
+      width: 100%; min-height: 48px; padding: 10px 14px; border-radius: 12px;
+      border: 2px solid var(--border); background: var(--surface-2); font-weight: 800; font-size: 1.05rem;
+    }
+    .scoring-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+    .scoring-foot .hint { margin: 0; }
+    .sticky-start {
+      position: sticky; bottom: 0; z-index: 5; margin-top: 6px;
+      padding: 14px 0 max(14px, env(safe-area-inset-bottom));
+      background: linear-gradient(to top, var(--bg) 70%, transparent);
+    }
+    .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    /* ---------- Grading + timer ---------- */
+    .btn-stack { flex-direction: column; gap: 0; line-height: 1.2; padding: 12px 10px; }
+    .btn-stack .sub { font-weight: 700; font-size: .85rem; opacity: .85; }
+    .btn-partial { --c: var(--warn); --s: #c97700; --t: #3a2200; }
+    .grade-actions.three { grid-template-columns: 1fr 1fr 1fr; }
+    .timer-row .right { display: flex; align-items: center; gap: 10px; }
+    .add-time {
+      min-height: 36px; padding: 4px 12px; border-radius: 999px; border: 2px solid currentColor;
+      background: transparent; color: inherit; font-weight: 900; cursor: pointer;
+    }
+
+    /* ---------- Score breakdown + history ---------- */
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 18px 0 12px; }
+    .stat { border-radius: 16px; padding: 12px 8px; background: var(--surface-2); }
+    .stat strong { display: block; font-size: 1.6rem; line-height: 1.1; }
+    .stat span { font-weight: 800; font-size: .85rem; color: var(--muted); }
+    .stat.full strong { color: var(--primary-shade); }
+    [data-theme="dark"] .stat.full strong { color: var(--primary); }
+    .stat.partial strong { color: var(--warn); }
+    .stat.miss strong { color: var(--danger); }
+    .type-split { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+    .review-item .tag { display: inline-block; margin-bottom: 4px; font-size: .78rem; font-weight: 900; padding: 2px 8px; border-radius: 999px; }
+    .tag-partial { background: var(--sample-bg); color: var(--sample); }
+    .tag-miss { background: #ffe1e1; color: var(--danger-shade); }
+    [data-theme="dark"] .tag-miss { background: #4a1c1c; color: #ff9a9a; }
+    .history h2 { margin: 0 0 12px; font-size: 1.2rem; }
+    .history-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-top: 2px solid var(--border); font-weight: 800; }
+    .history-item:first-child { border-top: 0; padding-top: 0; }
+    .history-item small { display: block; color: var(--muted); font-weight: 700; }
+    .history-item .pts { white-space: nowrap; text-align: right; }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; }
       .confetti { display: none; }
@@ -312,40 +373,73 @@
         <p>3rd–5th Grade Division · 2026–2027 list</p>
       </div>
 
-      <section class="panel" aria-labelledby="setupTitle">
-        <h2 id="setupTitle" class="sr-only">Battle setup</h2>
-        <label class="label" for="bookSelect">Choose a book</label>
-        <div class="select-wrap">
-          <select id="bookSelect"></select>
+      <section class="panel" aria-labelledby="pickTitle">
+        <div class="panel-head">
+          <h2 id="pickTitle">1. Pick your books</h2>
+          <div class="link-btns">
+            <button class="chip-btn" type="button" id="pickAll">Select all</button>
+            <button class="chip-btn" type="button" id="pickNone">Clear</button>
+          </div>
         </div>
-        <p class="hint" id="bookHint"></p>
+        <div class="shelf" id="shelf" role="group" aria-labelledby="pickTitle"></div>
+        <p class="picked-hint" id="pickedHint" role="status"></p>
+      </section>
 
-        <div class="settings-row">
+      <section class="panel" aria-labelledby="setTitle">
+        <div class="panel-head"><h2 id="setTitle">2. Set up your run</h2></div>
+        <div class="settings-grid">
           <div>
             <span class="label" id="typeLabel">Question type</span>
             <div class="segmented" role="group" aria-labelledby="typeLabel" id="typeGroup">
-              <button type="button" data-type="mixed" aria-pressed="true">Mixed</button>
-              <button type="button" data-type="iwb" aria-pressed="false">In Which Book</button>
-              <button type="button" data-type="content" aria-pressed="false">Content</button>
+              <button type="button" data-value="mixed">Mixed</button>
+              <button type="button" data-value="iwb">In Which Book</button>
+              <button type="button" data-value="content">Content</button>
             </div>
           </div>
-          <label class="switch">
-            <span>15-second timer</span>
-            <input type="checkbox" id="timerSwitch">
-            <span class="track" aria-hidden="true"></span>
-          </label>
+          <div>
+            <span class="label" id="sizeLabel">Questions per run</span>
+            <div class="segmented" role="group" aria-labelledby="sizeLabel" id="sizeGroup">
+              <button type="button" data-value="8">8</button>
+              <button type="button" data-value="16">16</button>
+              <button type="button" data-value="24">24</button>
+              <button type="button" data-value="0">All</button>
+            </div>
+          </div>
+          <div>
+            <span class="label" id="timerLabel">Time to answer</span>
+            <div class="segmented" role="group" aria-labelledby="timerLabel" id="timerGroup">
+              <button type="button" data-value="0">Off</button>
+              <button type="button" data-value="15">15 s</button>
+              <button type="button" data-value="30">30 s</button>
+              <button type="button" data-value="60">60 s</button>
+            </div>
+            <p class="hint">Real battles give 15 seconds. You can add more time during a question.</p>
+          </div>
         </div>
 
-        <div class="start-row">
-          <button class="btn btn-primary btn-block" id="startBtn" type="button">Start battle</button>
-        </div>
+        <details class="scoring">
+          <summary>Points per answer</summary>
+          <div class="points-grid">
+            <label>In Which Book: title + author <input type="number" id="ptIwbFull" min="0" max="99" inputmode="numeric"></label>
+            <label>In Which Book: title only <input type="number" id="ptIwbPartial" min="0" max="99" inputmode="numeric"></label>
+            <label>Content: correct <input type="number" id="ptContentFull" min="0" max="99" inputmode="numeric"></label>
+            <label>Content: partly right <input type="number" id="ptContentPartial" min="0" max="99" inputmode="numeric"></label>
+          </div>
+          <div class="scoring-foot">
+            <p class="hint">Set partial points to 0 to turn off partial credit.</p>
+            <button class="chip-btn" type="button" id="resetPoints">Reset to 5 and 3</button>
+          </div>
+        </details>
       </section>
 
-      <div class="shelf-head">
-        <h2>The book list</h2>
-        <span>Tap a book to practice just that one</span>
+      <div class="sticky-start">
+        <button class="btn btn-primary btn-block" id="startBtn" type="button">Start run</button>
       </div>
-      <div class="shelf" id="shelf"></div>
+
+      <section class="panel history" id="historyPanel" hidden>
+        <h2>Recent runs</h2>
+        <div id="historyList"></div>
+      </section>
 
       <details class="add-q panel">
         <summary>Add your own questions</summary>
@@ -358,8 +452,8 @@
           <div>
             <span class="label" id="addTypeLabel">Type</span>
             <div class="segmented" role="group" aria-labelledby="addTypeLabel" id="addTypeGroup">
-              <button type="button" data-type="iwb" aria-pressed="true">In Which Book</button>
-              <button type="button" data-type="content" aria-pressed="false">Content</button>
+              <button type="button" data-value="iwb">In Which Book</button>
+              <button type="button" data-value="content">Content</button>
             </div>
           </div>
           <div>
@@ -378,16 +472,33 @@
         </form>
       </details>
 
+      <details class="add-q panel sources">
+        <summary>Sources</summary>
+        <h3>Book list</h3>
+        <p>The 16 titles and authors come from the 2026–2027 OBOB 3rd–5th Grade Division list that was given to us when we built this app.</p>
+        <h3>Questions and answers</h3>
+        <p>The built-in questions were written from general knowledge of each book. They were not checked page by page against the books, so a few details could be wrong. If a question doesn't match your copy, trust the book.</p>
+        <ul>
+          <li>Built-in questions: Dogtown, Frindle, The Lightning Thief, Esperanza Rising, Caterpillar Summer, Connect the Stars, A Kind of Spark, The Magic Misfits, The Misadventures of the Family Fletcher, Snow and Rose, The Witch Boy.</li>
+          <li>Sample cards only (no story details yet): The Grace of Wild Things, The Guardian Test, It's the End of the World and I'm in My Bathing Suit, Light and Air, Murder at the Museum. These only use each book's title and author.</li>
+          <li>Questions marked "My question" were added on this device by you.</li>
+        </ul>
+        <h3>Scoring and timing</h3>
+        <p>The default points (5 for a full answer, 3 for a partial one) and the 15-second answer time are based on how OBOB battles usually run. Rules can change from year to year and region to region, so check with your coach. You can change the points under "Points per answer".</p>
+        <h3>Where to check</h3>
+        <p>Official book lists and battle rules: <a href="https://www.oregonbattleofthebooks.org" target="_blank" rel="noopener">oregonbattleofthebooks.org</a></p>
+      </details>
+
       <footer>Study tool made for fun. Not affiliated with Oregon Battle of the Books.</footer>
     </main>
 
     <!-- ========== Battle ========== -->
     <main id="battle" hidden>
       <div class="battle-top">
-        <button class="icon-btn" id="quitBtn" type="button" aria-label="Quit battle">
+        <button class="icon-btn" id="quitBtn" type="button" aria-label="Quit run">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
-        <div class="progress" role="progressbar" aria-label="Battle progress" aria-valuemin="0" id="progress">
+        <div class="progress" role="progressbar" aria-label="Run progress" aria-valuemin="0" id="progress">
           <div class="progress-fill" id="progressFill"></div>
         </div>
         <div class="progress-text" id="progressText" aria-hidden="true"></div>
@@ -395,7 +506,7 @@
 
       <div class="battle-meta">
         <span class="score-pill" id="scorePill"></span>
-        <button type="button" class="timer-toggle" id="timerToggle" aria-pressed="false">
+        <button type="button" class="timer-toggle" id="timerToggle" aria-pressed="false" aria-label="Change answer timer">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2h5"/></svg>
           <span>Timer <span id="timerState">off</span></span>
         </button>
@@ -405,7 +516,13 @@
         <article class="card" id="card" aria-live="off">
           <div class="badges" id="badges"></div>
           <div id="timerBox" hidden>
-            <div class="timer-row" id="timerRow"><span>Time</span><span class="secs" id="timerSecs">15</span></div>
+            <div class="timer-row" id="timerRow">
+              <span>Time</span>
+              <span class="right">
+                <button class="add-time" id="addTime" type="button" aria-label="Add 15 seconds">+15 s</button>
+                <span class="secs" id="timerSecs">15</span>
+              </span>
+            </div>
             <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
           </div>
           <h2 class="question" id="questionText" tabindex="-1"></h2>
@@ -418,13 +535,14 @@
           <div class="card-actions" id="revealActions">
             <button class="btn btn-primary btn-block" id="revealBtn" type="button">Show answer</button>
           </div>
-          <div class="card-actions grade-actions" id="gradeActions" hidden>
-            <button class="btn btn-danger" id="missBtn" type="button">Missed it</button>
-            <button class="btn btn-primary" id="gotBtn" type="button">Got it!</button>
+          <div class="card-actions grade-actions three" id="gradeActions" hidden>
+            <button class="btn btn-danger btn-stack" id="missBtn" type="button"><span>Missed</span><span class="sub">0 pts</span></button>
+            <button class="btn btn-partial btn-stack" id="partialBtn" type="button"><span id="partialLabel">Title only</span><span class="sub" id="partialPts"></span></button>
+            <button class="btn btn-primary btn-stack" id="fullBtn" type="button"><span id="fullLabel">Title + author</span><span class="sub" id="fullPts"></span></button>
           </div>
         </article>
       </div>
-      <p class="kbd-hint">Keyboard: Space shows the answer · ← missed · → got it</p>
+      <p class="kbd-hint">Keyboard: Space shows the answer · ← missed · ↓ partial · → full points</p>
     </main>
 
     <!-- ========== Results ========== -->
@@ -439,9 +557,15 @@
         </div>
         <h2 id="resultTitle" tabindex="-1"></h2>
         <p class="sub" id="resultSub"></p>
+        <div class="stats">
+          <div class="stat full"><strong id="statFull">0</strong><span>Full points</span></div>
+          <div class="stat partial"><strong id="statPartial">0</strong><span>Partial</span></div>
+          <div class="stat miss"><strong id="statMiss">0</strong><span>Missed</span></div>
+        </div>
+        <div class="type-split" id="typeSplit"></div>
         <div class="result-actions">
           <button class="btn btn-outline" id="homeBtn" type="button">Home</button>
-          <button class="btn btn-primary" id="againBtn" type="button">Battle again</button>
+          <button class="btn btn-primary" id="againBtn" type="button">Run again</button>
         </div>
       </section>
       <section class="panel review" id="review" hidden>
@@ -611,22 +735,41 @@
     }
 
     /* =========================================================
+       Scoring
+       Defaults follow OBOB battle scoring: In Which Book = 5 points for
+       title + author, 3 for the title alone. Editable on the home screen.
+       ========================================================= */
+    const DEFAULT_POINTS = { iwbFull: 5, iwbPartial: 3, contentFull: 5, contentPartial: 3 };
+    const POINT_INPUTS = { iwbFull: "ptIwbFull", iwbPartial: "ptIwbPartial", contentFull: "ptContentFull", contentPartial: "ptContentPartial" };
+
+    function pointsFor(q, result) {
+      const p = state.points;
+      if (result === "miss") return 0;
+      if (q.type === "iwb") return result === "full" ? p.iwbFull : p.iwbPartial;
+      return result === "full" ? p.contentFull : p.contentPartial;
+    }
+    const maxFor = q => pointsFor(q, "full");
+    const partialAllowed = q => pointsFor(q, "partial") > 0;
+    const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+    /* =========================================================
        State
        ========================================================= */
-    const SESSION_SIZE = 16;
-    const TIME_LIMIT = 15;
+    const TIMER_OPTIONS = [0, 15, 30, 60];
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     const state = {
-      book: "all",
-      type: "mixed",
-      timerOn: store.get("obob-timer", false),
+      books: new Set(store.get("obob-books", BOOKS.map(b => b.id))),
+      type: store.get("obob-type", "mixed"),
+      size: store.get("obob-size", 16),
+      timer: store.get("obob-timer-secs", 0),
+      points: { ...DEFAULT_POINTS, ...store.get("obob-points", {}) },
       deck: [],
       index: 0,
-      correct: 0,
-      missed: [],
+      results: [],
       revealed: false,
-      timerId: null
+      timerId: null,
+      timerEnd: 0
     };
 
     const $ = id => document.getElementById(id);
@@ -668,11 +811,7 @@
     /* =========================================================
        Home screen
        ========================================================= */
-    function fillBookOptions(select, includeAll) {
-      select.innerHTML = "";
-      if (includeAll) select.add(new Option("All 16 books (mixed battle)", "all"));
-      BOOKS.forEach(b => select.add(new Option(`${b.title} · ${b.author}`, b.id)));
-    }
+    const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 
     function renderShelf() {
       const shelf = $("shelf");
@@ -683,56 +822,100 @@
         tile.type = "button";
         tile.className = "book-tile";
         tile.style.setProperty("--spine", SPINES[i % SPINES.length]);
-        tile.setAttribute("aria-pressed", String(state.book === b.id));
+        tile.setAttribute("aria-pressed", String(state.books.has(b.id)));
+        const check = document.createElement("span");
+        check.className = "check";
+        check.innerHTML = CHECK_ICON;
         const strong = document.createElement("strong");
         strong.textContent = b.title;
         const small = document.createElement("small");
         small.textContent = b.author;
         const count = document.createElement("span");
         count.className = "count";
-        count.textContent = custom ? `${custom} question${custom === 1 ? "" : "s"}` : "Sample cards only";
-        tile.append(strong, small, count);
-        tile.addEventListener("click", () => setBook(state.book === b.id ? "all" : b.id));
+        count.textContent = custom ? plural(custom, "question") : "Sample cards only";
+        tile.append(check, strong, small, count);
+        tile.addEventListener("click", () => {
+          if (state.books.has(b.id)) state.books.delete(b.id);
+          else state.books.add(b.id);
+          saveBooks();
+        });
         shelf.appendChild(tile);
       });
+      updatePickedHint();
     }
 
-    function setBook(id) {
-      state.book = id;
-      $("bookSelect").value = id;
-      if (id === "all") {
-        $("bookHint").textContent = "One question from every book, just like a real battle round.";
-      } else {
-        const n = Math.min(getQuestionsForBook(id).length, SESSION_SIZE);
-        $("bookHint").textContent = `Practice ${n} questions from this book.`;
-      }
+    function saveBooks() {
+      store.set("obob-books", [...state.books]);
       renderShelf();
     }
 
-    function wireSegmented(group, onChange) {
-      group.addEventListener("click", e => {
-        const btn = e.target.closest("button[data-type]");
-        if (!btn) return;
-        group.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
-        onChange(btn.dataset.type);
+    function availablePool() {
+      return BOOKS.filter(b => state.books.has(b.id)).flatMap(b => {
+        const pool = getQuestionsForBook(b.id);
+        const filtered = pool.filter(matchesType);
+        return filtered.length ? filtered : pool;
       });
     }
 
-    fillBookOptions($("bookSelect"), true);
-    fillBookOptions($("addBook"), false);
-    $("bookSelect").addEventListener("change", e => setBook(e.target.value));
-    wireSegmented($("typeGroup"), t => { state.type = t; });
-    $("timerSwitch").checked = state.timerOn;
-    $("timerSwitch").addEventListener("change", e => setTimerOn(e.target.checked));
+    function updatePickedHint() {
+      const n = state.books.size;
+      const available = availablePool().length;
+      const runLength = state.size ? Math.min(state.size, available) : available;
+      $("pickedHint").textContent = n
+        ? `${plural(n, "book")} picked · ${plural(runLength, "question")} this run`
+        : "Pick at least one book to start.";
+      $("startBtn").disabled = n === 0;
+    }
+
+    /* Segmented controls: one pressed button, value in data-value */
+    function setSegmented(group, value) {
+      group.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.value === String(value))));
+    }
+    function wireSegmented(group, initial, onChange) {
+      setSegmented(group, initial);
+      group.addEventListener("click", e => {
+        const btn = e.target.closest("button[data-value]");
+        if (!btn) return;
+        setSegmented(group, btn.dataset.value);
+        onChange(btn.dataset.value);
+      });
+    }
+
+    $("pickAll").addEventListener("click", () => { state.books = new Set(BOOKS.map(b => b.id)); saveBooks(); });
+    $("pickNone").addEventListener("click", () => { state.books.clear(); saveBooks(); });
+
+    wireSegmented($("typeGroup"), state.type, v => { state.type = v; store.set("obob-type", v); updatePickedHint(); });
+    wireSegmented($("sizeGroup"), state.size, v => { state.size = Number(v); store.set("obob-size", state.size); updatePickedHint(); });
+    wireSegmented($("timerGroup"), state.timer, v => setTimer(Number(v)));
+
+    /* Points per answer */
+    function fillPointInputs() {
+      Object.entries(POINT_INPUTS).forEach(([key, id]) => { $(id).value = state.points[key]; });
+    }
+    Object.entries(POINT_INPUTS).forEach(([key, id]) => {
+      $(id).addEventListener("input", e => {
+        const n = Math.max(0, Math.min(99, Math.round(Number(e.target.value)) || 0));
+        state.points[key] = n;
+        store.set("obob-points", state.points);
+      });
+      $(id).addEventListener("blur", fillPointInputs);
+    });
+    $("resetPoints").addEventListener("click", () => {
+      state.points = { ...DEFAULT_POINTS };
+      store.set("obob-points", state.points);
+      fillPointInputs();
+    });
+    fillPointInputs();
+
     $("startBtn").addEventListener("click", startBattle);
-    setBook("all");
 
     /* Add your own questions */
+    BOOKS.forEach(b => $("addBook").add(new Option(`${b.title} · ${b.author}`, b.id)));
     let addType = "iwb";
-    wireSegmented($("addTypeGroup"), t => {
-      addType = t;
-      $("addAnswerWrap").hidden = t === "iwb";
-      $("addA").required = t === "content";
+    wireSegmented($("addTypeGroup"), addType, v => {
+      addType = v;
+      $("addAnswerWrap").hidden = v === "iwb";
+      $("addA").required = v === "content";
     });
     $("addForm").addEventListener("submit", e => {
       e.preventDefault();
@@ -747,7 +930,7 @@
       $("addA").value = "";
       $("formMsg").textContent = "Saved!";
       setTimeout(() => { $("formMsg").textContent = ""; }, 2000);
-      setBook(state.book);
+      renderShelf();
     });
     $("clearMine").addEventListener("click", () => {
       const total = Object.values(getMine()).reduce((n, list) => n + list.length, 0);
@@ -755,36 +938,76 @@
       if (!confirm(`Delete all ${total} of your saved questions?`)) return;
       store.set("obob-my-questions", {});
       $("formMsg").textContent = "Deleted.";
-      setBook(state.book);
+      renderShelf();
     });
+
+    /* Recent runs */
+    function renderHistory() {
+      const runs = store.get("obob-history", []);
+      $("historyPanel").hidden = runs.length === 0;
+      const list = $("historyList");
+      list.innerHTML = "";
+      runs.forEach(r => {
+        const item = document.createElement("div");
+        item.className = "history-item";
+        const left = document.createElement("div");
+        left.textContent = r.label;
+        const when = document.createElement("small");
+        when.textContent = new Date(r.at).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+        left.appendChild(when);
+        const right = document.createElement("div");
+        right.className = "pts";
+        right.textContent = `${r.points} / ${r.max} pts`;
+        const pct = document.createElement("small");
+        pct.textContent = `${r.max ? Math.round((r.points / r.max) * 100) : 0}%`;
+        right.appendChild(pct);
+        item.append(left, right);
+        list.appendChild(item);
+      });
+    }
+
+    function runLabel() {
+      const picked = BOOKS.filter(b => state.books.has(b.id));
+      if (picked.length === BOOKS.length) return "All 16 books";
+      if (picked.length === 1) return picked[0].title;
+      return `${picked.length} books`;
+    }
+
+    renderShelf();
+    renderHistory();
 
     /* =========================================================
        Battle
        ========================================================= */
     function matchesType(q) { return state.type === "mixed" || q.type === state.type; }
 
+    /* Takes questions round-robin across the picked books so every book gets a turn. */
     function buildDeck() {
-      if (state.book === "all") {
-        return shuffle(BOOKS.map(b => {
-          const pool = getQuestionsForBook(b.id);
-          const filtered = pool.filter(matchesType);
-          const pick = filtered.length ? filtered : pool;
-          return pick[Math.floor(Math.random() * pick.length)];
-        }));
+      const piles = shuffle(BOOKS.filter(b => state.books.has(b.id)).map(b => {
+        const pool = getQuestionsForBook(b.id);
+        const filtered = pool.filter(matchesType);
+        return shuffle(filtered.length ? filtered : pool);
+      }));
+      const total = piles.reduce((n, p) => n + p.length, 0);
+      const target = state.size ? Math.min(state.size, total) : total;
+      const deck = [];
+      while (deck.length < target) {
+        piles.forEach(p => { if (p.length && deck.length < target) deck.push(p.shift()); });
       }
-      const pool = getQuestionsForBook(state.book);
-      const filtered = pool.filter(matchesType);
-      return shuffle(filtered.length ? filtered : pool).slice(0, SESSION_SIZE);
+      return shuffle(deck);
     }
 
     function startBattle() {
+      if (!state.books.size) return;
       state.deck = buildDeck();
       state.index = 0;
-      state.correct = 0;
-      state.missed = [];
+      state.results = [];
       show("battle");
       renderCard(false);
     }
+
+    const earned = () => state.results.reduce((n, r) => n + r.points, 0);
+    const possibleSoFar = () => state.results.reduce((n, r) => n + maxFor(r.q), 0);
 
     function renderCard(animate = true) {
       const card = $("card");
@@ -801,7 +1024,7 @@
         bar.setAttribute("aria-valuemax", total);
         bar.setAttribute("aria-valuenow", state.index + 1);
         bar.setAttribute("aria-valuetext", `Question ${state.index + 1} of ${total}`);
-        $("scorePill").textContent = `Question ${state.index + 1} of ${total} · ${state.correct} correct`;
+        $("scorePill").textContent = `Question ${state.index + 1} of ${total} · ${earned()} / ${possibleSoFar()} pts`;
 
         // Badges (IWB cards never show the book, that would give the answer away)
         const badges = $("badges");
@@ -819,6 +1042,15 @@
           $("answerText").textContent = q.a;
           $("answerAuthor").textContent = book.title;
         }
+
+        // Grading buttons for this question type
+        $("fullLabel").textContent = q.type === "iwb" ? "Title + author" : "Correct";
+        $("partialLabel").textContent = q.type === "iwb" ? "Title only" : "Partly right";
+        $("fullPts").textContent = `+${pointsFor(q, "full")} pts`;
+        $("partialPts").textContent = `+${pointsFor(q, "partial")} pts`;
+        $("partialBtn").hidden = !partialAllowed(q);
+        $("gradeActions").classList.toggle("three", partialAllowed(q));
+
         $("answerBox").hidden = true;
         $("timesUp").hidden = true;
         $("revealActions").hidden = false;
@@ -861,61 +1093,76 @@
       $("revealActions").hidden = true;
       $("gradeActions").hidden = false;
       announce(`${timeUp ? "Time's up. " : ""}Answer: ${$("answerText").textContent} ${$("answerAuthor").textContent}`);
-      $("gotBtn").focus({ preventScroll: true });
+      $("fullBtn").focus({ preventScroll: true });
     }
 
-    function grade(gotIt) {
+    /* result: "full" | "partial" | "miss" */
+    function grade(result) {
       if (!state.revealed) return;
       const q = state.deck[state.index];
-      if (gotIt) state.correct++;
-      else state.missed.push(q);
+      if (result === "partial" && !partialAllowed(q)) return;
+      state.results.push({ q, result, points: pointsFor(q, result) });
+      state.revealed = false; // ignore extra taps while the next card slides in
       state.index++;
       if (state.index >= state.deck.length) finish();
       else renderCard(true);
     }
 
     $("revealBtn").addEventListener("click", () => reveal(false));
-    $("gotBtn").addEventListener("click", () => grade(true));
-    $("missBtn").addEventListener("click", () => grade(false));
+    $("fullBtn").addEventListener("click", () => grade("full"));
+    $("partialBtn").addEventListener("click", () => grade("partial"));
+    $("missBtn").addEventListener("click", () => grade("miss"));
     $("quitBtn").addEventListener("click", () => {
-      if (state.index > 0 && !confirm("Quit this battle? Your progress will be lost.")) return;
+      if (state.index > 0 && !confirm("Quit this run? Your score won't be saved.")) return;
       stopTimer();
       show("home");
+      renderShelf();
     });
 
     document.addEventListener("keydown", e => {
       if (screens.battle.hidden || e.altKey || e.ctrlKey || e.metaKey) return;
       if (e.key === " " && !state.revealed && document.activeElement.tagName !== "BUTTON") { e.preventDefault(); reveal(false); }
-      else if (e.key === "ArrowRight" && state.revealed) grade(true);
-      else if (e.key === "ArrowLeft" && state.revealed) grade(false);
+      else if (!state.revealed) return;
+      else if (e.key === "ArrowRight") grade("full");
+      else if (e.key === "ArrowDown") { e.preventDefault(); grade("partial"); }
+      else if (e.key === "ArrowLeft") grade("miss");
     });
 
     /* =========================================================
-       Timer (15 s, like a real OBOB battle)
+       Answer timer (Off, 15, 30 or 60 s; real battles use 15)
        ========================================================= */
-    function setTimerOn(on) {
-      state.timerOn = on;
-      store.set("obob-timer", on);
-      $("timerSwitch").checked = on;
-      $("timerToggle").setAttribute("aria-pressed", String(on));
-      $("timerState").textContent = on ? "on" : "off";
+    function setTimer(secs) {
+      state.timer = secs;
+      store.set("obob-timer-secs", secs);
+      setSegmented($("timerGroup"), secs);
+      $("timerToggle").setAttribute("aria-pressed", String(secs > 0));
+      $("timerState").textContent = secs ? `${secs} s` : "off";
       if (!screens.battle.hidden) {
-        if (on && !state.revealed) startTimer();
+        if (secs && !state.revealed) startTimer();
         else stopTimer();
       }
     }
-    setTimerOn(state.timerOn);
-    $("timerToggle").addEventListener("click", () => setTimerOn(!state.timerOn));
+    setTimer(state.timer);
+    $("timerToggle").addEventListener("click", () => {
+      const next = TIMER_OPTIONS[(TIMER_OPTIONS.indexOf(state.timer) + 1) % TIMER_OPTIONS.length];
+      setTimer(next);
+      announce(next ? `Timer ${next} seconds` : "Timer off");
+    });
+    $("addTime").addEventListener("click", () => {
+      if (!state.timerId) return;
+      state.timerEnd += 15000;
+      announce("15 seconds added");
+    });
 
     function startTimer() {
       stopTimer();
-      $("timerBox").hidden = !state.timerOn;
-      if (!state.timerOn || state.revealed) return;
-      const end = Date.now() + TIME_LIMIT * 1000;
+      $("timerBox").hidden = !state.timer;
+      if (!state.timer || state.revealed) return;
+      state.timerEnd = Date.now() + state.timer * 1000;
       const tick = () => {
-        const left = Math.max(0, (end - Date.now()) / 1000);
+        const left = Math.max(0, (state.timerEnd - Date.now()) / 1000);
         $("timerSecs").textContent = Math.ceil(left);
-        $("timerFill").style.transform = `scaleX(${left / TIME_LIMIT})`;
+        $("timerFill").style.transform = `scaleX(${Math.min(1, left / state.timer)})`;
         $("timerRow").classList.toggle("urgent", left <= 5);
         if (left <= 0) reveal(true);
       };
@@ -927,7 +1174,7 @@
       clearInterval(state.timerId);
       state.timerId = null;
       $("timerRow").classList.remove("urgent");
-      if (!state.timerOn) $("timerBox").hidden = true;
+      if (!state.timer) $("timerBox").hidden = true;
     }
 
     /* =========================================================
@@ -936,8 +1183,9 @@
     function finish() {
       stopTimer();
       $("progressFill").style.width = "100%";
-      const total = state.deck.length;
-      const pct = Math.round((state.correct / total) * 100);
+      const total = earned();
+      const max = possibleSoFar();
+      const pct = max ? Math.round((total / max) * 100) : 0;
       const C = 2 * Math.PI * 66;
       const ring = $("ringFg");
       ring.style.strokeDasharray = C;
@@ -946,33 +1194,59 @@
       show("results");
       requestAnimationFrame(() => requestAnimationFrame(() => { ring.style.strokeDashoffset = C * (1 - pct / 100); }));
       $("ringPct").textContent = `${pct}%`;
-      $("ringScore").textContent = `${state.correct} of ${total}`;
+      $("ringScore").textContent = `${total} of ${max} pts`;
 
       const [title, sub] =
-        pct === 100 ? ["Perfect battle!", "Every single one. Your team is lucky to have you."] :
+        pct === 100 ? ["Perfect run!", "Every point. Your team is lucky to have you."] :
         pct >= 80   ? ["Amazing work!", "You really know these books."] :
-        pct >= 50   ? ["Nice job!", "Review the ones you missed and try again."] :
-                      ["Keep reading!", "Every battle makes you stronger. Try again!"];
+        pct >= 50   ? ["Nice job!", "Review the ones below and try again."] :
+                      ["Keep reading!", "Every run makes you stronger. Try again!"];
       $("resultTitle").textContent = title;
       $("resultSub").textContent = sub;
       $("resultTitle").focus({ preventScroll: true });
 
+      const count = r => state.results.filter(x => x.result === r).length;
+      $("statFull").textContent = count("full");
+      $("statPartial").textContent = count("partial");
+      $("statMiss").textContent = count("miss");
+
+      // Points by question type
+      const split = $("typeSplit");
+      split.innerHTML = "";
+      [["iwb", "In Which Book", "badge-iwb"], ["content", "Content", "badge-content"]].forEach(([type, name, cls]) => {
+        const rows = state.results.filter(r => r.q.type === type);
+        if (!rows.length) return;
+        const got = rows.reduce((n, r) => n + r.points, 0);
+        const of = rows.reduce((n, r) => n + maxFor(r.q), 0);
+        split.appendChild(makeBadge(`${name}: ${got} / ${of} pts`, cls, type));
+      });
+
+      // Review: everything that wasn't full points
       const list = $("reviewList");
       list.innerHTML = "";
-      state.missed.forEach(q => {
+      const toReview = state.results.filter(r => r.result !== "full");
+      toReview.forEach(({ q, result }) => {
         const book = BOOKS.find(b => b.id === q.bookId);
         const item = document.createElement("div");
         item.className = "review-item";
+        const tag = document.createElement("span");
+        tag.className = `tag tag-${result}`;
+        tag.textContent = result === "partial" ? "Partial" : "Missed";
         const qEl = document.createElement("div");
         qEl.className = "q";
         qEl.textContent = q.q;
         const aEl = document.createElement("div");
         aEl.className = "a";
         aEl.textContent = q.type === "iwb" ? `${book.title} by ${book.author}` : q.a;
-        item.append(qEl, aEl);
+        item.append(tag, qEl, aEl);
         list.appendChild(item);
       });
-      $("review").hidden = state.missed.length === 0;
+      $("review").hidden = toReview.length === 0;
+
+      // Save to recent runs (last 10)
+      const runs = store.get("obob-history", []);
+      runs.unshift({ at: Date.now(), label: `${runLabel()} · ${plural(state.results.length, "question")}`, points: total, max });
+      store.set("obob-history", runs.slice(0, 10));
 
       if (pct >= 80) confetti();
     }
@@ -994,7 +1268,7 @@
     }
 
     $("againBtn").addEventListener("click", startBattle);
-    $("homeBtn").addEventListener("click", () => { show("home"); setBook(state.book); });
+    $("homeBtn").addEventListener("click", () => { show("home"); renderShelf(); renderHistory(); });
   </script>
 </body>
 </html>
