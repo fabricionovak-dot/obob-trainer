@@ -367,6 +367,41 @@
     .history-item small { display: block; color: var(--muted); font-weight: 700; }
     .history-item .pts { white-space: nowrap; text-align: right; }
 
+    /* ---------- Difficulty info ---------- */
+    .label-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+    .label-row .label { margin-bottom: 0; }
+    .info-btn {
+      width: 32px; height: 32px; margin: -6px 0; border: 0; border-radius: 50%; background: transparent;
+      color: var(--muted); display: grid; place-items: center; cursor: pointer; transition: color .15s, background .15s;
+    }
+    .info-btn:hover { color: var(--content); background: var(--content-bg); }
+    .info-btn svg { width: 20px; height: 20px; }
+    .sheet {
+      width: min(640px, calc(100% - 32px)); max-height: calc(100% - 48px); padding: 22px;
+      border: 2px solid var(--border); border-radius: 24px; background: var(--surface); color: var(--text);
+      box-shadow: var(--shadow);
+    }
+    .sheet[open] { animation: pop-in .25s cubic-bezier(.2, .9, .3, 1.3); }
+    .sheet::backdrop { background: rgba(16, 19, 28, .5); }
+    .sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+    .sheet-head h2 { margin: 6px 0 0; font-size: 1.3rem; }
+    .sheet-intro, .sheet-note { margin: 0 0 14px; font-weight: 600; }
+    .sheet-note { color: var(--muted); font-size: .92rem; }
+    .sheet-note:last-child { margin-bottom: 0; }
+    .level-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: .95rem; }
+    .level-table th, .level-table td { text-align: left; vertical-align: top; padding: 12px 10px; border-top: 2px solid var(--border); }
+    .level-table thead th { border-top: 0; padding-top: 0; font-size: .85rem; font-weight: 900; color: var(--muted); }
+    .level-table td { font-weight: 600; }
+    .level-table td:last-child { color: var(--muted); }
+    .level-table tbody th { padding-left: 0; white-space: nowrap; }
+    @media (max-width: 560px) {
+      .level-table thead { display: none; }
+      .level-table tr { display: block; padding: 12px 0; border-top: 2px solid var(--border); }
+      .level-table th, .level-table td { display: block; border: 0; padding: 0; }
+      .level-table tbody th { margin-bottom: 6px; }
+      .level-table td + td { margin-top: 6px; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; }
       .confetti { display: none; }
@@ -413,7 +448,12 @@
             </div>
           </div>
           <div>
-            <span class="label" id="levelLabel">Question difficulty</span>
+            <div class="label-row">
+              <span class="label" id="levelLabel">Question difficulty</span>
+              <button class="info-btn" type="button" id="levelInfoBtn" aria-label="How question difficulty works" aria-haspopup="dialog">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v5.5M12 7.5v.01"/></svg>
+              </button>
+            </div>
             <div class="segmented" role="group" aria-labelledby="levelLabel" id="levelGroup">
               <button type="button" data-value="all">All</button>
               <button type="button" data-value="easy">Easy</button>
@@ -619,6 +659,38 @@
       </section>
     </main>
   </div>
+
+  <dialog class="sheet" id="levelInfo" aria-labelledby="levelInfoTitle">
+    <div class="sheet-head">
+      <h2 id="levelInfoTitle">How question difficulty works</h2>
+      <button class="icon-btn" type="button" id="levelInfoClose" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <p class="sheet-intro">Each question gets a level based on how big a part of the book it is. The bigger the part, the more likely you remember it after reading the book once.</p>
+    <table class="level-table">
+      <thead><tr><th scope="col">Level</th><th scope="col">What it asks about</th><th scope="col">Examples</th></tr></thead>
+      <tbody>
+        <tr>
+          <th scope="row"><span class="badge badge-level badge-easy">Easy</span></th>
+          <td>The main idea of the book, the thing it's known for. Usually it's on the back cover. Main character names too.</td>
+          <td>"In which book does a boy invent a new word for a pen?"<br>"Which Greek god is Percy's father?" (Poseidon)</td>
+        </tr>
+        <tr>
+          <th scope="row"><span class="badge badge-level badge-medium">Medium</span></th>
+          <td>Key events in the middle of the story and important side characters.</td>
+          <td>"What illness does Mama get in California?" (Valley Fever)<br>"Who stole Zeus's master bolt?" (Luke)</td>
+        </tr>
+        <tr>
+          <th scope="row"><span class="badge badge-level badge-hard">Hard</span></th>
+          <td>Small details: place names, full names, minor characters, or lists where you need every part.</td>
+          <td>"What is the name of the family's ranch in Mexico?" (El Rancho de las Rosas)<br>"Name all four Fletcher brothers."</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="sheet-note">For In Which Book questions, it's about how quickly a moment points to its book. The main idea is Easy. A scene from the middle of the story is Medium or Hard.</p>
+    <p class="sheet-note">These levels are our best guess and haven't been tested with readers. If a question feels easier or harder to you, you're probably right.</p>
+  </dialog>
 
   <div class="sr-only" aria-live="assertive" id="announcer"></div>
 
@@ -1021,6 +1093,16 @@
     fillPointInputs();
 
     $("startBtn").addEventListener("click", startBattle);
+
+    /* Difficulty info sheet */
+    const levelInfo = $("levelInfo");
+    $("levelInfoBtn").addEventListener("click", () => levelInfo.showModal());
+    $("levelInfoClose").addEventListener("click", () => levelInfo.close());
+    levelInfo.addEventListener("click", e => { // tap outside the sheet closes it
+      const r = levelInfo.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) levelInfo.close();
+    });
+    levelInfo.addEventListener("close", () => $("levelInfoBtn").focus());
 
     /* Add your own questions */
     BOOKS.forEach(b => $("addBook").add(new Option(`${b.title} · ${b.author}`, b.id)));
