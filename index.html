@@ -290,6 +290,15 @@
     @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
 
     footer { text-align: center; color: var(--muted); font-size: .85rem; font-weight: 600; margin-top: 34px; }
+    footer p { margin: 10px 0 0; }
+    .feedback-link { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 2px solid var(--border); background: var(--surface); color: var(--text); font-weight: 800; font-size: .95rem; text-decoration: none; }
+    .feedback-link:hover { border-color: var(--content); color: var(--content); }
+    .report-row { margin-top: 14px; text-align: center; }
+    .report-link, .review-item .report { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-weight: 700; font-size: .9rem; text-decoration: underline; text-underline-offset: 3px; }
+    .report-link { min-height: 44px; padding: 0 8px; }
+    .report-link:hover, .review-item .report:hover { color: var(--content); }
+    .report-link svg { width: 16px; height: 16px; }
+    .review-item .report { margin-top: 6px; font-size: .85rem; }
 
     /* ---------- Book picker ---------- */
     .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
@@ -567,7 +576,10 @@
         <p>Official book lists and battle rules: <a href="https://www.oregonbattleofthebooks.org" target="_blank" rel="noopener">oregonbattleofthebooks.org</a></p>
       </details>
 
-      <footer>Study tool made for fun. Not affiliated with Oregon Battle of the Books.</footer>
+      <footer>
+        <a class="feedback-link" id="feedbackLink" target="_blank" rel="noopener">Send feedback</a>
+        <p>Study tool made for fun. Not affiliated with Oregon Battle of the Books.</p>
+      </footer>
     </main>
 
     <!-- ========== Battle ========== -->
@@ -624,6 +636,12 @@
             <button class="btn btn-danger btn-stack" id="missBtn" type="button"><span>Missed</span><span class="sub">0 pts</span></button>
             <button class="btn btn-partial btn-stack" id="partialBtn" type="button"><span id="partialLabel">Title only</span><span class="sub" id="partialPts"></span></button>
             <button class="btn btn-primary btn-stack" id="fullBtn" type="button"><span id="fullLabel">Title + author</span><span class="sub" id="fullPts"></span></button>
+          </div>
+          <div class="report-row" id="reportRow" hidden>
+            <a class="report-link" id="reportLink" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>
+              Something wrong? Report this question
+            </a>
           </div>
         </article>
       </div>
@@ -892,6 +910,26 @@
       }
     };
     const getMine = () => store.get("obob-my-questions", {});
+
+    /* Parent feedback goes to a Google Form. Report links pre-fill the type and the question. */
+    const FEEDBACK_FORM = "https://docs.google.com/forms/d/e/1FAIpQLSehRBeh3FX3QG8_6XzbuVM8MEZMNT-sXiXqxnm8pUEMbiW8Gg/viewform";
+    const FORM_FIELDS = { kind: "entry.1804606351", feedback: "entry.166228376" };
+    function reportUrl(q) {
+      const book = BOOKS.find(b => b.id === q.bookId);
+      const answer = q.type === "iwb" ? `${book.title} by ${book.author}` : q.a;
+      const lines = [
+        `Book: ${book.title}`,
+        `Question: ${q.q}`,
+        `Answer in the app: ${answer}`,
+        q.mine ? "(This was one of my own questions.)" : "",
+        "",
+        "What's wrong: "
+      ].filter((line, i) => line || i === 4);
+      const params = new URLSearchParams({ usp: "pp_url" });
+      params.set(FORM_FIELDS.kind, "A question or answer is wrong");
+      params.set(FORM_FIELDS.feedback, lines.join("\n"));
+      return `${FEEDBACK_FORM}?${params}`;
+    }
     const LEVELS = { easy: "Easy", medium: "Medium", hard: "Hard" };
     const levelOf = q => LEVELS[q.level] ? q.level : "medium"; // older saved questions have no level
 
@@ -1093,6 +1131,7 @@
     fillPointInputs();
 
     $("startBtn").addEventListener("click", startBattle);
+    $("feedbackLink").href = FEEDBACK_FORM;
 
     /* Difficulty info sheet */
     const levelInfo = $("levelInfo");
@@ -1255,6 +1294,8 @@
 
         $("answerBox").hidden = true;
         $("contextBox").hidden = true;
+        $("reportRow").hidden = true;
+        $("reportLink").href = reportUrl(q);
         $("timesUp").hidden = true;
         $("revealActions").hidden = false;
         $("gradeActions").hidden = true;
@@ -1294,6 +1335,7 @@
       $("timesUp").hidden = !timeUp;
       $("answerBox").hidden = false;
       $("contextBox").hidden = !$("contextText").textContent;
+      $("reportRow").hidden = false;
       $("revealActions").hidden = true;
       $("gradeActions").hidden = false;
       announce(`${timeUp ? "Time's up. " : ""}Answer: ${$("answerText").textContent} ${$("answerAuthor").textContent}. ${$("contextText").textContent}`);
@@ -1456,12 +1498,19 @@
         aEl.className = "a";
         aEl.textContent = q.type === "iwb" ? `${book.title} by ${book.author}` : q.a;
         item.append(tag, qEl, aEl);
+        const report = document.createElement("a");
+        report.className = "report";
+        report.href = reportUrl(q);
+        report.target = "_blank";
+        report.rel = "noopener";
+        report.textContent = "Report this question";
         if (q.context && !q.sample) {
           const cEl = document.createElement("div");
           cEl.className = "c";
           cEl.textContent = q.context;
           item.appendChild(cEl);
         }
+        item.appendChild(report);
         list.appendChild(item);
       });
       $("review").hidden = toReview.length === 0;
