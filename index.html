@@ -217,6 +217,12 @@
     .badge-content { background: var(--content-bg); color: var(--content); }
     .badge-sample { background: var(--sample-bg); color: var(--sample); }
     .badge-mine { background: var(--surface-2); color: var(--muted); }
+    .badge-level::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+    .badge-easy { background: #e4f8d4; color: var(--primary-shade); }
+    .badge-medium { background: var(--sample-bg); color: var(--sample); }
+    .badge-hard { background: #ffe1e1; color: var(--danger-shade); }
+    [data-theme="dark"] .badge-easy { background: #1f3a10; color: var(--primary); }
+    [data-theme="dark"] .badge-hard { background: #4a1c1c; color: #ff9a9a; }
 
     .timer-bar { height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden; margin-bottom: 18px; }
     .timer-fill { height: 100%; width: 100%; background: var(--warn); border-radius: 999px; transform-origin: left; }
@@ -224,6 +230,8 @@
     .timer-row.urgent { color: var(--danger); }
     .timer-row.urgent + .timer-bar .timer-fill { background: var(--danger); }
     .timer-row.urgent .secs { animation: pulse .5s ease-in-out infinite alternate; }
+    .timer-row.reading { color: var(--content); }
+    .timer-row.reading + .timer-bar .timer-fill { background: var(--content); }
     @keyframes pulse { to { transform: scale(1.18); } }
     .secs { display: inline-block; font-variant-numeric: tabular-nums; }
 
@@ -238,6 +246,13 @@
     .answer-label { font-size: .85rem; font-weight: 900; color: var(--muted); margin-bottom: 4px; }
     .answer-text { font-size: clamp(1.2rem, 3vw, 1.5rem); font-weight: 900; }
     .answer-author { font-weight: 700; color: var(--muted); margin-top: 2px; }
+    .context {
+      margin-top: 12px; border-radius: 18px; padding: 14px 18px; background: var(--content-bg);
+      animation: pop-in .3s .08s cubic-bezier(.2, .9, .3, 1.3) backwards;
+    }
+    .context-label { display: flex; align-items: center; gap: 6px; font-size: .85rem; font-weight: 900; color: var(--content); margin-bottom: 4px; }
+    .context-label svg { width: 16px; height: 16px; }
+    .context-text { margin: 0; font-weight: 700; font-size: 1.02rem; line-height: 1.4; }
     .times-up { display: inline-block; margin-bottom: 8px; color: var(--danger); font-weight: 900; }
 
     .card-actions { margin-top: 22px; display: grid; gap: 12px; }
@@ -265,6 +280,7 @@
     .review-item .q { font-weight: 700; margin-bottom: 4px; }
     .review-item .a { font-weight: 900; color: var(--primary-shade); }
     [data-theme="dark"] .review-item .a { color: var(--primary); }
+    .review-item .c { margin-top: 4px; color: var(--muted); font-weight: 600; font-size: .92rem; }
 
     .confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 10; }
     .confetti i {
@@ -391,9 +407,18 @@
           <div>
             <span class="label" id="typeLabel">Question type</span>
             <div class="segmented" role="group" aria-labelledby="typeLabel" id="typeGroup">
-              <button type="button" data-value="mixed">Mixed</button>
               <button type="button" data-value="iwb">In Which Book</button>
               <button type="button" data-value="content">Content</button>
+              <button type="button" data-value="mixed">Mixed</button>
+            </div>
+          </div>
+          <div>
+            <span class="label" id="levelLabel">Question difficulty</span>
+            <div class="segmented" role="group" aria-labelledby="levelLabel" id="levelGroup">
+              <button type="button" data-value="all">All</button>
+              <button type="button" data-value="easy">Easy</button>
+              <button type="button" data-value="medium">Medium</button>
+              <button type="button" data-value="hard">Hard</button>
             </div>
           </div>
           <div>
@@ -413,7 +438,7 @@
               <button type="button" data-value="30">30 s</button>
               <button type="button" data-value="60">60 s</button>
             </div>
-            <p class="hint">Real battles give 15 seconds. You can add more time during a question.</p>
+            <p class="hint">Real battles give 15 seconds. Each question starts with 5 seconds to read before the clock runs. You can add more time during a question.</p>
           </div>
         </div>
 
@@ -464,6 +489,18 @@
             <label class="label" for="addA">Answer</label>
             <input type="text" id="addA" placeholder="The answer">
           </div>
+          <div>
+            <span class="label" id="addLevelLabel">Difficulty</span>
+            <div class="segmented" role="group" aria-labelledby="addLevelLabel" id="addLevelGroup">
+              <button type="button" data-value="easy">Easy</button>
+              <button type="button" data-value="medium">Medium</button>
+              <button type="button" data-value="hard">Hard</button>
+            </div>
+          </div>
+          <div>
+            <label class="label" for="addC">Where this happens (optional)</label>
+            <textarea id="addC" placeholder="Shown under the answer, e.g. This happens on the first day of camp."></textarea>
+          </div>
           <div class="form-actions">
             <button class="btn btn-primary" type="submit">Save question</button>
             <button class="btn btn-outline" type="button" id="clearMine">Delete my questions</button>
@@ -482,6 +519,7 @@
           <li>Built-in questions: Dogtown, Frindle, The Lightning Thief, Esperanza Rising, Caterpillar Summer, Connect the Stars, A Kind of Spark, The Magic Misfits, The Misadventures of the Family Fletcher, Snow and Rose, The Witch Boy.</li>
           <li>Sample cards only (no story details yet): The Grace of Wild Things, The Guardian Test, It's the End of the World and I'm in My Bathing Suit, Light and Air, Murder at the Museum. These only use each book's title and author.</li>
           <li>Questions marked "My question" were added on this device by you.</li>
+          <li>Easy, Medium and Hard levels and the "Where this happens" notes were set by us as a guess. Easy = the main idea of the book, Hard = small details like names of places or minor characters.</li>
         </ul>
         <h3>Scoring and timing</h3>
         <p>The default points (5 for a full answer, 3 for a partial one) and the 15-second answer time are based on how OBOB battles usually run. Rules can change from year to year and region to region, so check with your coach. You can change the points under "Points per answer".</p>
@@ -517,7 +555,7 @@
           <div class="badges" id="badges"></div>
           <div id="timerBox" hidden>
             <div class="timer-row" id="timerRow">
-              <span>Time</span>
+              <span id="timerLabelText">Time</span>
               <span class="right">
                 <button class="add-time" id="addTime" type="button" aria-label="Add 15 seconds">+15 s</button>
                 <span class="secs" id="timerSecs">15</span>
@@ -531,6 +569,13 @@
             <div class="answer-label">Answer</div>
             <div class="answer-text" id="answerText"></div>
             <div class="answer-author" id="answerAuthor"></div>
+          </div>
+          <div class="context" id="contextBox" hidden>
+            <div class="context-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+              Where this happens
+            </div>
+            <p class="context-text" id="contextText"></p>
           </div>
           <div class="card-actions" id="revealActions">
             <button class="btn btn-primary btn-block" id="revealBtn" type="button">Show answer</button>
@@ -606,88 +651,148 @@
        Question database
        type "iwb"     = In Which Book (answer is the book + author, filled in automatically)
        type "content" = Content trivia (needs an answer)
+       level          = "easy" | "medium" | "hard"
+       context        = shown under the answer so kids can place the moment in the story
        Books with fewer than 4 entries are topped up by generateFallback().
        ========================================================= */
     const questionDatabase = {
       dogtown: [
-        { type: "iwb", q: "In which book is the story told by a three-legged dog who lives at a shelter?" },
-        { type: "iwb", q: "In which book does a real dog become friends with a robot dog?" },
-        { type: "content", q: "In Dogtown, what is the name of the dog who tells the story?", a: "Chance" },
-        { type: "content", q: "In Dogtown, what is the name of the robot dog Chance becomes friends with?", a: "Metal Dog" },
-        { type: "content", q: "In Dogtown, what two kinds of dogs live at the Dogtown shelter?", a: "Real dogs and robot dogs" }
+        { type: "iwb", level: "easy", q: "In which book is the story told by a three-legged dog who lives at a shelter?",
+          context: "Chance tells the whole story himself. He lives at the Dogtown shelter and hopes a family will pick him even with three legs." },
+        { type: "iwb", level: "medium", q: "In which book does a real dog become friends with a robot dog?",
+          context: "At Dogtown, real dogs and robot dogs wait to be adopted side by side. Chance's best friend there is a robot dog." },
+        { type: "content", level: "easy", q: "In Dogtown, what is the name of the dog who tells the story?", a: "Chance",
+          context: "The book is told from Chance's point of view, so you see the shelter through a dog's eyes." },
+        { type: "content", level: "medium", q: "In Dogtown, what is the name of the robot dog Chance becomes friends with?", a: "Metal Dog",
+          context: "Metal Dog lives at the shelter too. He and Chance team up while they both hope to find a home." },
+        { type: "content", level: "medium", q: "In Dogtown, what two kinds of dogs live at the Dogtown shelter?", a: "Real dogs and robot dogs",
+          context: "This is what makes Dogtown different from other shelters, and it's set up right at the start of the book." }
       ],
       frindle: [
-        { type: "iwb", q: "In which book does a boy invent a new word for a pen?" },
-        { type: "iwb", q: "In which book does a teacher who loves the dictionary keep students after school for using a made-up word?" },
-        { type: "content", q: "In Frindle, what everyday object does Nick give a new name?", a: "A pen" },
-        { type: "content", q: "In Frindle, what is the name of Nick's fifth-grade language arts teacher?", a: "Mrs. Granger" },
-        { type: "content", q: "In Frindle, what is Nick's last name?", a: "Allen" },
-        { type: "content", q: "In Frindle, which businessman starts selling frindle products?", a: "Bud Lawrence" }
+        { type: "iwb", level: "easy", q: "In which book does a boy invent a new word for a pen?",
+          context: "Nick wants to prove that people decide what words mean, so he starts calling a pen something brand new." },
+        { type: "iwb", level: "medium", q: "In which book does a teacher who loves the dictionary keep students after school for using a made-up word?",
+          context: "Mrs. Granger doesn't want the new word in her classroom. Kids who use it have to stay after school, and that only makes it spread." },
+        { type: "content", level: "easy", q: "In Frindle, what everyday object does Nick give a new name?", a: "A pen",
+          context: "This is the idea the whole book is built on. It starts after a class talk about where words come from." },
+        { type: "content", level: "easy", q: "In Frindle, what is the name of Nick's fifth-grade language arts teacher?", a: "Mrs. Granger",
+          context: "She is famous at school for loving the dictionary. She and Nick end up on opposite sides of the frindle fight." },
+        { type: "content", level: "medium", q: "In Frindle, what is Nick's last name?", a: "Allen",
+          context: "Nick Allen is the kid with big ideas who starts the whole thing." },
+        { type: "content", level: "hard", q: "In Frindle, which businessman starts selling frindle products?", a: "Bud Lawrence",
+          context: "Once the word gets famous, a local businessman sees a chance to make money and starts selling frindle pens and other stuff." }
       ],
       lightning: [
-        { type: "iwb", q: "In which book does a boy find out the pen he carries turns into a sword?" },
-        { type: "iwb", q: "In which book do three friends get stuck in a Las Vegas hotel where time passes much faster than they think?" },
-        { type: "content", q: "In The Lightning Thief, what is the name of the summer camp for demigods?", a: "Camp Half-Blood" },
-        { type: "content", q: "In The Lightning Thief, which Greek god is Percy's father?", a: "Poseidon" },
-        { type: "content", q: "In The Lightning Thief, what is the name of Percy's satyr friend?", a: "Grover" },
-        { type: "content", q: "In The Lightning Thief, who turns out to have stolen Zeus's master bolt?", a: "Luke" },
-        { type: "content", q: "In The Lightning Thief, what is the name of Percy's sword?", a: "Riptide (Anaklusmos)" }
+        { type: "iwb", level: "easy", q: "In which book does a boy find out the pen he carries turns into a sword?",
+          context: "Percy is given a pen that becomes a magic sword. It always comes back to his pocket, even if he loses it." },
+        { type: "iwb", level: "hard", q: "In which book do three friends get stuck in a Las Vegas hotel where time passes much faster than they think?",
+          context: "This happens during the quest. Percy, Annabeth, and Grover stop at a fun hotel and almost forget why they're traveling." },
+        { type: "content", level: "easy", q: "In The Lightning Thief, what is the name of the summer camp for demigods?", a: "Camp Half-Blood",
+          context: "Percy is brought here early in the book. It's where he learns he's a demigod and meets most of the other characters." },
+        { type: "content", level: "easy", q: "In The Lightning Thief, which Greek god is Percy's father?", a: "Poseidon",
+          context: "At camp, Percy finds out who his dad is. It's a big deal because Poseidon isn't supposed to have demigod kids." },
+        { type: "content", level: "easy", q: "In The Lightning Thief, what is the name of Percy's satyr friend?", a: "Grover",
+          context: "Grover is Percy's friend from school before Percy knows he's a satyr. His job is to protect Percy." },
+        { type: "content", level: "medium", q: "In The Lightning Thief, who turns out to have stolen Zeus's master bolt?", a: "Luke",
+          context: "This is the big surprise near the end of the book. Luke had been friendly to Percy at camp." },
+        { type: "content", level: "hard", q: "In The Lightning Thief, what is the name of Percy's sword?", a: "Riptide (Anaklusmos)",
+          context: "It's the pen-sword Percy gets early on. Its Greek name is Anaklusmos." }
       ],
       esperanza: [
-        { type: "iwb", q: "In which book does a girl's family lose their ranch in Mexico and move to work on farms in California?" },
-        { type: "iwb", q: "In which book does a grandmother teach her granddaughter to crochet a blanket with zigzag mountains?" },
-        { type: "content", q: "In Esperanza Rising, what is the name of the family's ranch in Mexico?", a: "El Rancho de las Rosas" },
-        { type: "content", q: "In Esperanza Rising, what illness does Mama get in California?", a: "Valley Fever" },
-        { type: "content", q: "In Esperanza Rising, what is the name of the boy who works on the ranch and becomes Esperanza's friend?", a: "Miguel" },
-        { type: "content", q: "In Esperanza Rising, what does Esperanza's grandmother teach her to make?", a: "A crocheted blanket" }
+        { type: "iwb", level: "easy", q: "In which book does a girl's family lose their ranch in Mexico and move to work on farms in California?",
+          context: "After a tragedy at home, Esperanza and her mother leave their rich life in Mexico and start over as farm workers." },
+        { type: "iwb", level: "medium", q: "In which book does a grandmother teach her granddaughter to crochet a blanket with zigzag mountains?",
+          context: "Abuelita teaches Esperanza to crochet. The ups and downs of the zigzag stand for the ups and downs of life." },
+        { type: "content", level: "hard", q: "In Esperanza Rising, what is the name of the family's ranch in Mexico?", a: "El Rancho de las Rosas",
+          context: "This is Esperanza's home at the start of the book, before the family has to leave." },
+        { type: "content", level: "medium", q: "In Esperanza Rising, what illness does Mama get in California?", a: "Valley Fever",
+          context: "This happens after they move to the farm camp. Mama gets very sick, and Esperanza has to work to help the family." },
+        { type: "content", level: "easy", q: "In Esperanza Rising, what is the name of the boy who works on the ranch and becomes Esperanza's friend?", a: "Miguel",
+          context: "Miguel's family worked for Esperanza's family in Mexico. They travel to California together." },
+        { type: "content", level: "easy", q: "In Esperanza Rising, what does Esperanza's grandmother teach her to make?", a: "A crocheted blanket",
+          context: "Abuelita starts teaching her in Mexico. Esperanza keeps working on the blanket through the hard times that follow." }
       ],
       caterpillar: [
-        { type: "iwb", q: "In which book do a girl and her little brother spend the summer with grandparents they have never met?" },
-        { type: "content", q: "In Caterpillar Summer, what is the nickname of Cat's younger brother?", a: "Chicken" },
-        { type: "content", q: "In Caterpillar Summer, what is Cat's full first name?", a: "Caterpillar" },
-        { type: "content", q: "In Caterpillar Summer, on what island do Cat's grandparents live?", a: "Gingerbread Island" }
+        { type: "iwb", level: "easy", q: "In which book do a girl and her little brother spend the summer with grandparents they have never met?",
+          context: "Cat and her brother's summer plans fall through, so they stay with their grandparents on an island in North Carolina." },
+        { type: "content", level: "easy", q: "In Caterpillar Summer, what is the nickname of Cat's younger brother?", a: "Chicken",
+          context: "Cat spends a lot of time looking after Chicken, and that's a big part of the story." },
+        { type: "content", level: "medium", q: "In Caterpillar Summer, what is Cat's full first name?", a: "Caterpillar",
+          context: "Everyone calls her Cat for short." },
+        { type: "content", level: "hard", q: "In Caterpillar Summer, on what island do Cat's grandparents live?", a: "Gingerbread Island",
+          context: "This is where most of the summer happens, after Cat and Chicken arrive at their grandparents' home." }
       ],
       stars: [
-        { type: "iwb", q: "In which book can one of the main characters always tell when someone is lying?" },
-        { type: "iwb", q: "In which book does a boy who remembers everything he reads go to a wilderness camp in the desert?" },
-        { type: "content", q: "In Connect the Stars, what special ability does Audrey have?", a: "She can tell when people are lying" },
-        { type: "content", q: "In Connect the Stars, what special ability does Aaron have?", a: "He remembers everything (a perfect memory)" }
+        { type: "iwb", level: "easy", q: "In which book can one of the main characters always tell when someone is lying?",
+          context: "Audrey is like a human lie detector. It makes it hard for her to have friends at school." },
+        { type: "iwb", level: "medium", q: "In which book does a boy who remembers everything he reads go to a wilderness camp in the desert?",
+          context: "Aaron and Audrey are both sent to a summer camp in the desert, where they meet and team up." },
+        { type: "content", level: "easy", q: "In Connect the Stars, what special ability does Audrey have?", a: "She can tell when people are lying",
+          context: "The two main characters each have a special ability, and the chapters switch between them." },
+        { type: "content", level: "easy", q: "In Connect the Stars, what special ability does Aaron have?", a: "He remembers everything (a perfect memory)",
+          context: "Aaron remembers everything he reads. That helps him at camp, but it's also why kids at school pick on him." }
       ],
       spark: [
-        { type: "iwb", q: "In which book does a girl campaign for a memorial to the women accused of being witches in her village?" },
-        { type: "iwb", q: "In which book does an autistic girl who loves sharks stand up to a teacher who treats her unfairly?" },
-        { type: "content", q: "In A Kind of Spark, what is the name of Addie's village?", a: "Juniper" },
-        { type: "content", q: "In A Kind of Spark, what are the names of Addie's older twin sisters?", a: "Keedie and Nina" },
-        { type: "content", q: "In A Kind of Spark, what animal does Addie love to learn about?", a: "Sharks" },
-        { type: "content", q: "In A Kind of Spark, what is the name of the new girl who becomes Addie's friend?", a: "Audrey" }
+        { type: "iwb", level: "medium", q: "In which book does a girl campaign for a memorial to the women accused of being witches in her village?",
+          context: "Addie learns that women in her village were once treated badly for being different. She fights to make sure people remember them." },
+        { type: "iwb", level: "easy", q: "In which book does an autistic girl who loves sharks stand up to a teacher who treats her unfairly?",
+          context: "Addie is autistic, and one of her teachers is hard on her. She learns to speak up for herself." },
+        { type: "content", level: "hard", q: "In A Kind of Spark, what is the name of Addie's village?", a: "Juniper",
+          context: "It's a small village in Scotland, and its history with witch trials is what starts Addie's campaign." },
+        { type: "content", level: "medium", q: "In A Kind of Spark, what are the names of Addie's older twin sisters?", a: "Keedie and Nina",
+          context: "Keedie is autistic like Addie and understands her best." },
+        { type: "content", level: "easy", q: "In A Kind of Spark, what animal does Addie love to learn about?", a: "Sharks",
+          context: "Addie knows tons about sharks and talks about them when she's excited or needs to feel calm." },
+        { type: "content", level: "medium", q: "In A Kind of Spark, what is the name of the new girl who becomes Addie's friend?", a: "Audrey",
+          context: "Audrey is new at school. She becomes Addie's friend after things get hard with Addie's old friend." }
       ],
       misfits: [
-        { type: "iwb", q: "In which book does a boy run away from his crooked Uncle Sly by hopping on a train?" },
-        { type: "iwb", q: "In which book does a group of young magicians team up to stop a carnival owner named B.B. Bosso?" },
-        { type: "content", q: "In The Magic Misfits, what is the name of the town where Carter ends up?", a: "Mineral Wells" },
-        { type: "content", q: "In The Magic Misfits, who owns the magic shop where Carter finds a home?", a: "Mr. Vernon (Dante Vernon)" },
-        { type: "content", q: "In The Magic Misfits, what kind of magic is Leila best at?", a: "Escapes (she's an escape artist)" },
-        { type: "content", q: "In The Magic Misfits, what are the names of the joke-telling twins?", a: "Olly and Izzy Golden" }
+        { type: "iwb", level: "easy", q: "In which book does a boy run away from his crooked Uncle Sly by hopping on a train?",
+          context: "This is how the book starts. Carter has been living with an uncle who makes him steal, so he runs away." },
+        { type: "iwb", level: "medium", q: "In which book does a group of young magicians team up to stop a carnival owner named B.B. Bosso?",
+          context: "Carter makes friends who also love magic. Together they try to stop the carnival crew from robbing the town." },
+        { type: "content", level: "medium", q: "In The Magic Misfits, what is the name of the town where Carter ends up?", a: "Mineral Wells",
+          context: "Carter gets off the train here after running away. It's where the rest of the story takes place." },
+        { type: "content", level: "medium", q: "In The Magic Misfits, who owns the magic shop where Carter finds a home?", a: "Mr. Vernon (Dante Vernon)",
+          context: "He runs the magic shop in Mineral Wells and is kind to Carter." },
+        { type: "content", level: "medium", q: "In The Magic Misfits, what kind of magic is Leila best at?", a: "Escapes (she's an escape artist)",
+          context: "Each Misfit has their own kind of magic. Leila can get out of locks and ropes." },
+        { type: "content", level: "hard", q: "In The Magic Misfits, what are the names of the joke-telling twins?", a: "Olly and Izzy Golden",
+          context: "The twins are part of the Misfits and are always telling jokes." }
       ],
       fletcher: [
-        { type: "iwb", q: "In which book do four brothers and their two dads deal with a grumpy new neighbor?" },
-        { type: "iwb", q: "In which book does a six-year-old have an imaginary cheetah named Flare?" },
-        { type: "content", q: "In The Misadventures of the Family Fletcher, what are the names of the four brothers?", a: "Sam, Jax, Eli, and Frog" },
-        { type: "content", q: "In The Misadventures of the Family Fletcher, what is the name of the grumpy neighbor?", a: "Mr. Nelson" },
-        { type: "content", q: "In The Misadventures of the Family Fletcher, what do the boys call their two dads?", a: "Dad and Papa" }
+        { type: "iwb", level: "easy", q: "In which book do four brothers and their two dads deal with a grumpy new neighbor?",
+          context: "The book follows the Fletcher family through one school year, and the cranky neighbor causes trouble all along the way." },
+        { type: "iwb", level: "medium", q: "In which book does a six-year-old have an imaginary cheetah named Flare?",
+          context: "Frog, the youngest Fletcher brother, has an imaginary cheetah. He's starting kindergarten." },
+        { type: "content", level: "hard", q: "In The Misadventures of the Family Fletcher, what are the names of the four brothers?", a: "Sam, Jax, Eli, and Frog",
+          context: "The book follows each of the four boys, from oldest to youngest, through the school year." },
+        { type: "content", level: "medium", q: "In The Misadventures of the Family Fletcher, what is the name of the grumpy neighbor?", a: "Mr. Nelson",
+          context: "He moves in next door and complains about the noisy Fletchers." },
+        { type: "content", level: "easy", q: "In The Misadventures of the Family Fletcher, what do the boys call their two dads?", a: "Dad and Papa",
+          context: "Each dad has his own name so the boys can tell them apart." }
       ],
       snowrose: [
-        { type: "iwb", q: "In which book do two sisters move to a cottage in the woods after their father goes missing?" },
-        { type: "iwb", q: "In which book does a bear come to two sisters' cottage door?" },
-        { type: "content", q: "In Snow and Rose, what animal visits the sisters' cottage?", a: "A bear" },
-        { type: "content", q: "In Snow and Rose, what happened to the sisters' father?", a: "He disappeared in the woods" }
+        { type: "iwb", level: "easy", q: "In which book do two sisters move to a cottage in the woods after their father goes missing?",
+          context: "This is how the story begins. The sisters and their mother have to start a new, poorer life in the forest." },
+        { type: "iwb", level: "medium", q: "In which book does a bear come to two sisters' cottage door?",
+          context: "One winter night, a bear shows up at the sisters' cottage. It's one of the fairy-tale moments in the book." },
+        { type: "content", level: "easy", q: "In Snow and Rose, what animal visits the sisters' cottage?", a: "A bear",
+          context: "The bear's visit is one of the biggest moments in the story." },
+        { type: "content", level: "medium", q: "In Snow and Rose, what happened to the sisters' father?", a: "He disappeared in the woods",
+          context: "This happens before the story starts, and it's why the family moves into the cottage." }
       ],
       witchboy: [
-        { type: "iwb", q: "In which book does a boy secretly practice witchcraft even though the boys in his family are supposed to become shapeshifters?" },
-        { type: "iwb", q: "In which book do boys from a magical family start to disappear?" },
-        { type: "content", q: "In The Witch Boy, what is the main character's name?", a: "Aster" },
-        { type: "content", q: "In The Witch Boy, what is the name of Aster's friend who is not from a magical family?", a: "Charlie" },
-        { type: "content", q: "In The Witch Boy, in Aster's family, what magic do the girls learn?", a: "Witchcraft" }
+        { type: "iwb", level: "easy", q: "In which book does a boy secretly practice witchcraft even though the boys in his family are supposed to become shapeshifters?",
+          context: "In Aster's family, boys learn shapeshifting and girls learn witchcraft. Aster is drawn to witchcraft and has to hide it." },
+        { type: "iwb", level: "medium", q: "In which book do boys from a magical family start to disappear?",
+          context: "When the boys go missing, Aster's secret witchcraft may be the only way to find them." },
+        { type: "content", level: "easy", q: "In The Witch Boy, what is the main character's name?", a: "Aster",
+          context: "Aster is a boy from a big magical family. The story follows him as he tries to be who he is." },
+        { type: "content", level: "medium", q: "In The Witch Boy, what is the name of Aster's friend who is not from a magical family?", a: "Charlie",
+          context: "Aster meets Charlie outside his family's world. She helps him practice in secret." },
+        { type: "content", level: "easy", q: "In The Witch Boy, in Aster's family, what magic do the girls learn?", a: "Witchcraft",
+          context: "In Aster's family, girls learn witchcraft and boys learn shapeshifting. That rule causes Aster's problem." }
       ]
       // grace, guardian, endworld, lightair, museum: no custom entries yet, so fallback cards are used.
       // Add real questions here (or with the "Add your own questions" form) once someone has read them.
@@ -695,11 +800,12 @@
 
     /* Fallback: generates accurate sample cards from the book's title and author. */
     function generateFallback(book) {
+      const ctx = "This is a sample card. Nobody has written real questions for this book yet.";
       return [
-        { type: "iwb", q: `Which book on this year's list was written by ${book.author}?`, sample: true },
-        { type: "content", q: `Who wrote ${book.title}?`, a: book.author, sample: true },
-        { type: "content", q: `Who is the main character in ${book.title}, and what do they want most?`, a: "Say it out loud, then check your book or ask a teammate.", sample: true },
-        { type: "content", q: `Where does ${book.title} take place?`, a: "Say it out loud, then check your book or ask a teammate.", sample: true }
+        { type: "iwb", level: "easy", q: `Which book on this year's list was written by ${book.author}?`, context: ctx, sample: true },
+        { type: "content", level: "easy", q: `Who wrote ${book.title}?`, a: book.author, context: ctx, sample: true },
+        { type: "content", level: "medium", q: `Who is the main character in ${book.title}, and what do they want most?`, a: "Say it out loud, then check your book or ask a teammate.", context: ctx, sample: true },
+        { type: "content", level: "medium", q: `Where does ${book.title} take place?`, a: "Say it out loud, then check your book or ask a teammate.", context: ctx, sample: true }
       ];
     }
 
@@ -715,6 +821,8 @@
       }
     };
     const getMine = () => store.get("obob-my-questions", {});
+    const LEVELS = { easy: "Easy", medium: "Medium", hard: "Hard" };
+    const levelOf = q => LEVELS[q.level] ? q.level : "medium"; // older saved questions have no level
 
     function getQuestionsForBook(bookId) {
       const book = BOOKS.find(b => b.id === bookId);
@@ -760,9 +868,10 @@
 
     const state = {
       books: new Set(store.get("obob-books", BOOKS.map(b => b.id))),
-      type: store.get("obob-type", "mixed"),
+      type: store.get("obob-type-v2", "iwb"),
+      level: store.get("obob-level", "all"),
       size: store.get("obob-size", 16),
-      timer: store.get("obob-timer-secs", 0),
+      timer: store.get("obob-timer-v2", 15),
       points: { ...DEFAULT_POINTS, ...store.get("obob-points", {}) },
       deck: [],
       index: 0,
@@ -849,22 +958,26 @@
       renderShelf();
     }
 
+    /* Type falls back to the whole book if nothing matches; level is strict, so a Hard run stays hard. */
+    function poolForBook(bookId) {
+      const pool = getQuestionsForBook(bookId);
+      const byType = pool.filter(matchesType);
+      return (byType.length ? byType : pool).filter(matchesLevel);
+    }
+
     function availablePool() {
-      return BOOKS.filter(b => state.books.has(b.id)).flatMap(b => {
-        const pool = getQuestionsForBook(b.id);
-        const filtered = pool.filter(matchesType);
-        return filtered.length ? filtered : pool;
-      });
+      return BOOKS.filter(b => state.books.has(b.id)).flatMap(b => poolForBook(b.id));
     }
 
     function updatePickedHint() {
       const n = state.books.size;
       const available = availablePool().length;
       const runLength = state.size ? Math.min(state.size, available) : available;
-      $("pickedHint").textContent = n
-        ? `${plural(n, "book")} picked · ${plural(runLength, "question")} this run`
-        : "Pick at least one book to start.";
-      $("startBtn").disabled = n === 0;
+      $("pickedHint").textContent =
+        !n ? "Pick at least one book to start." :
+        !available ? `No ${state.level} questions for these books yet. Try another difficulty.` :
+        `${plural(n, "book")} picked · ${plural(runLength, "question")} this run`;
+      $("startBtn").disabled = n === 0 || available === 0;
     }
 
     /* Segmented controls: one pressed button, value in data-value */
@@ -884,7 +997,8 @@
     $("pickAll").addEventListener("click", () => { state.books = new Set(BOOKS.map(b => b.id)); saveBooks(); });
     $("pickNone").addEventListener("click", () => { state.books.clear(); saveBooks(); });
 
-    wireSegmented($("typeGroup"), state.type, v => { state.type = v; store.set("obob-type", v); updatePickedHint(); });
+    wireSegmented($("typeGroup"), state.type, v => { state.type = v; store.set("obob-type-v2", v); updatePickedHint(); });
+    wireSegmented($("levelGroup"), state.level, v => { state.level = v; store.set("obob-level", v); updatePickedHint(); });
     wireSegmented($("sizeGroup"), state.size, v => { state.size = Number(v); store.set("obob-size", state.size); updatePickedHint(); });
     wireSegmented($("timerGroup"), state.timer, v => setTimer(Number(v)));
 
@@ -912,6 +1026,8 @@
     /* Add your own questions */
     BOOKS.forEach(b => $("addBook").add(new Option(`${b.title} · ${b.author}`, b.id)));
     let addType = "iwb";
+    let addLevel = "medium";
+    wireSegmented($("addLevelGroup"), addLevel, v => { addLevel = v; });
     wireSegmented($("addTypeGroup"), addType, v => {
       addType = v;
       $("addAnswerWrap").hidden = v === "iwb";
@@ -922,12 +1038,17 @@
       const bookId = $("addBook").value;
       const q = $("addQ").value.trim();
       const a = $("addA").value.trim();
+      const context = $("addC").value.trim();
       if (!q || (addType === "content" && !a)) return;
       const mine = getMine();
-      (mine[bookId] = mine[bookId] || []).push(addType === "iwb" ? { type: "iwb", q } : { type: "content", q, a });
+      const entry = addType === "iwb" ? { type: "iwb", q } : { type: "content", q, a };
+      entry.level = addLevel;
+      if (context) entry.context = context;
+      (mine[bookId] = mine[bookId] || []).push(entry);
       store.set("obob-my-questions", mine);
       $("addQ").value = "";
       $("addA").value = "";
+      $("addC").value = "";
       $("formMsg").textContent = "Saved!";
       setTimeout(() => { $("formMsg").textContent = ""; }, 2000);
       renderShelf();
@@ -980,14 +1101,11 @@
        Battle
        ========================================================= */
     function matchesType(q) { return state.type === "mixed" || q.type === state.type; }
+    function matchesLevel(q) { return state.level === "all" || levelOf(q) === state.level; }
 
     /* Takes questions round-robin across the picked books so every book gets a turn. */
     function buildDeck() {
-      const piles = shuffle(BOOKS.filter(b => state.books.has(b.id)).map(b => {
-        const pool = getQuestionsForBook(b.id);
-        const filtered = pool.filter(matchesType);
-        return shuffle(filtered.length ? filtered : pool);
-      }));
+      const piles = shuffle(BOOKS.filter(b => state.books.has(b.id)).map(b => shuffle(poolForBook(b.id))));
       const total = piles.reduce((n, p) => n + p.length, 0);
       const target = state.size ? Math.min(state.size, total) : total;
       const deck = [];
@@ -1000,6 +1118,7 @@
     function startBattle() {
       if (!state.books.size) return;
       state.deck = buildDeck();
+      if (!state.deck.length) return;
       state.index = 0;
       state.results = [];
       show("battle");
@@ -1030,6 +1149,7 @@
         const badges = $("badges");
         badges.innerHTML = "";
         badges.appendChild(makeBadge(q.type === "iwb" ? "In Which Book" : "Content Trivia", q.type === "iwb" ? "badge-iwb" : "badge-content", q.type));
+        badges.appendChild(makeBadge(LEVELS[levelOf(q)], `badge-level badge-${levelOf(q)}`));
         if (q.sample) badges.appendChild(makeBadge("Sample card", "badge-sample"));
         if (q.mine) badges.appendChild(makeBadge("My question", "badge-mine"));
 
@@ -1042,6 +1162,7 @@
           $("answerText").textContent = q.a;
           $("answerAuthor").textContent = book.title;
         }
+        $("contextText").textContent = q.context || "";
 
         // Grading buttons for this question type
         $("fullLabel").textContent = q.type === "iwb" ? "Title + author" : "Correct";
@@ -1052,6 +1173,7 @@
         $("gradeActions").classList.toggle("three", partialAllowed(q));
 
         $("answerBox").hidden = true;
+        $("contextBox").hidden = true;
         $("timesUp").hidden = true;
         $("revealActions").hidden = false;
         $("gradeActions").hidden = true;
@@ -1090,9 +1212,10 @@
       stopTimer();
       $("timesUp").hidden = !timeUp;
       $("answerBox").hidden = false;
+      $("contextBox").hidden = !$("contextText").textContent;
       $("revealActions").hidden = true;
       $("gradeActions").hidden = false;
-      announce(`${timeUp ? "Time's up. " : ""}Answer: ${$("answerText").textContent} ${$("answerAuthor").textContent}`);
+      announce(`${timeUp ? "Time's up. " : ""}Answer: ${$("answerText").textContent} ${$("answerAuthor").textContent}. ${$("contextText").textContent}`);
       $("fullBtn").focus({ preventScroll: true });
     }
 
@@ -1130,10 +1253,12 @@
 
     /* =========================================================
        Answer timer (Off, 15, 30 or 60 s; real battles use 15)
+       Every question starts with READ_SECS to read before the answer clock runs.
        ========================================================= */
+    const READ_SECS = 5;
     function setTimer(secs) {
       state.timer = secs;
-      store.set("obob-timer-secs", secs);
+      store.set("obob-timer-v2", secs);
       setSegmented($("timerGroup"), secs);
       $("timerToggle").setAttribute("aria-pressed", String(secs > 0));
       $("timerState").textContent = secs ? `${secs} s` : "off";
@@ -1158,13 +1283,24 @@
       stopTimer();
       $("timerBox").hidden = !state.timer;
       if (!state.timer || state.revealed) return;
-      state.timerEnd = Date.now() + state.timer * 1000;
+      state.readEnd = Date.now() + READ_SECS * 1000;
+      state.timerEnd = state.readEnd + state.timer * 1000;
+      let wasReading = null;
       const tick = () => {
-        const left = Math.max(0, (state.timerEnd - Date.now()) / 1000);
+        const now = Date.now();
+        const reading = now < state.readEnd;
+        const left = Math.max(0, ((reading ? state.readEnd : state.timerEnd) - now) / 1000);
+        const span = reading ? READ_SECS : (state.timerEnd - state.readEnd) / 1000;
         $("timerSecs").textContent = Math.ceil(left);
-        $("timerFill").style.transform = `scaleX(${Math.min(1, left / state.timer)})`;
-        $("timerRow").classList.toggle("urgent", left <= 5);
-        if (left <= 0) reveal(true);
+        $("timerFill").style.transform = `scaleX(${Math.min(1, left / span)})`;
+        $("timerRow").classList.toggle("reading", reading);
+        $("timerRow").classList.toggle("urgent", !reading && left <= 5);
+        if (reading !== wasReading) {
+          $("timerLabelText").textContent = reading ? "Read the question" : "Time to answer";
+          if (wasReading) announce("Go! Time to answer.");
+          wasReading = reading;
+        }
+        if (!reading && left <= 0) reveal(true);
       };
       tick();
       state.timerId = setInterval(tick, 100);
@@ -1173,7 +1309,7 @@
     function stopTimer() {
       clearInterval(state.timerId);
       state.timerId = null;
-      $("timerRow").classList.remove("urgent");
+      $("timerRow").classList.remove("urgent", "reading");
       if (!state.timer) $("timerBox").hidden = true;
     }
 
@@ -1239,6 +1375,12 @@
         aEl.className = "a";
         aEl.textContent = q.type === "iwb" ? `${book.title} by ${book.author}` : q.a;
         item.append(tag, qEl, aEl);
+        if (q.context && !q.sample) {
+          const cEl = document.createElement("div");
+          cEl.className = "c";
+          cEl.textContent = q.context;
+          item.appendChild(cEl);
+        }
         list.appendChild(item);
       });
       $("review").hidden = toReview.length === 0;
