@@ -800,12 +800,11 @@
 
     /* Fallback: generates accurate sample cards from the book's title and author. */
     function generateFallback(book) {
-      const ctx = "This is a sample card. Nobody has written real questions for this book yet.";
       return [
-        { type: "iwb", level: "easy", q: `Which book on this year's list was written by ${book.author}?`, context: ctx, sample: true },
-        { type: "content", level: "easy", q: `Who wrote ${book.title}?`, a: book.author, context: ctx, sample: true },
-        { type: "content", level: "medium", q: `Who is the main character in ${book.title}, and what do they want most?`, a: "Say it out loud, then check your book or ask a teammate.", context: ctx, sample: true },
-        { type: "content", level: "medium", q: `Where does ${book.title} take place?`, a: "Say it out loud, then check your book or ask a teammate.", context: ctx, sample: true }
+        { type: "iwb", level: "easy", q: `Which book on this year's list was written by ${book.author}?`, sample: true },
+        { type: "content", level: "easy", q: `Who wrote ${book.title}?`, a: book.author, sample: true },
+        { type: "content", level: "medium", q: `Who is the main character in ${book.title}, and what do they want most?`, a: "Say it out loud, then check your book or ask a teammate.", sample: true },
+        { type: "content", level: "medium", q: `Where does ${book.title} take place?`, a: "Say it out loud, then check your book or ask a teammate.", sample: true }
       ];
     }
 
@@ -1207,7 +1206,7 @@
     }
 
     function reveal(timeUp = false) {
-      if (state.revealed) return;
+      if (state.revealed || $("card").classList.contains("leaving")) return; // next card is still sliding in
       state.revealed = true;
       stopTimer();
       $("timesUp").hidden = !timeUp;
